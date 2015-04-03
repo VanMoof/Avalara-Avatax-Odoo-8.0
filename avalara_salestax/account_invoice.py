@@ -22,6 +22,8 @@ import time
 #import string
 
 from openerp.osv import fields,osv
+#from openerp.osv import osv
+from openerp import models
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
 
@@ -69,21 +71,54 @@ class account_invoice(osv.osv):
     
     
     def _amount_all(self, cr, uid, ids, name, args, context=None):
-        res = super(account_invoice, self)._amount_all(cr, uid, ids, name, args, context=context)
+        res = {}
+        for invoice in self.browse(cr, uid, ids, context=context):
+            res[invoice.id] = {
+                'amount_untaxed': 0.0,
+                'amount_tax': 0.0,
+                'amount_total': 0.0,
+                'shipping_amt': 0.0,
+            }
+            for line in invoice.invoice_line:
+                res[invoice.id]['amount_untaxed'] += line.price_subtotal
+            for line in invoice.tax_line:
+                res[invoice.id]['amount_tax'] += line.amount                
+            for ship_line in invoice.shipping_lines:
+                res[invoice.id]['shipping_amt'] += ship_line.shipping_cost
+
+            res[invoice.id]['amount_total'] = res[invoice.id]['amount_untaxed'] + res[invoice.id]['amount_tax'] + res[invoice.id]['shipping_amt']                
+                
+            #res[invoice.id]['amount_total'] = res[invoice.id]['amount_tax'] + res[invoice.id]['amount_untaxed']        
+            return res
+        
+        '''        
+        #res = super(account_invoice, self)._amount_all(cr, uid, ids, name, args, context=context)
         for invoice in self.browse(cr, uid, ids, context=context):
             res[invoice.id]['shipping_amt'] = 0.0
             for ship_line in invoice.shipping_lines:
                  res[invoice.id]['shipping_amt'] += ship_line.shipping_cost
             res[invoice.id]['amount_total'] = res[invoice.id]['amount_untaxed'] + res[invoice.id]['amount_tax'] + res[invoice.id]['shipping_amt']
-        return res
+'''
+        
     
     def _get_invoice_tax(self, cr, uid, ids, context=None):
-        invoice = self.pool.get('account.invoice')
-        return super(account_invoice, invoice)._get_invoice_tax(cr, uid, ids, context=context)
+        #invoice = self.pool.get('account.invoice')
+        #return super(account_invoice, invoice)._get_invoice_tax(cr, uid, ids, context=context)
+        result = {}
+        for tax in self.pool.get('account.invoice.tax').browse(cr, uid, ids, context=context):
+            result[tax.invoice_id.id] = True
+        return result.keys()
     
     def _get_invoice_line(self, cr, uid, ids, context=None):
-        invoice = self.pool.get('account.invoice')
+        result = {}
+        for line in self.pool.get('account.invoice.line').browse(cr, uid, ids, context=context):
+            result[line.invoice_id.id] = True
+        return result.keys()         
+        '''     invoice = self.pool.get('account.invoice')
         return super(account_invoice, invoice)._get_invoice_line(cr, uid, ids, context=context)
+        
+'''
+   
     
     def _get_invoice_from_line(self, cr, uid, ids, context=None):
         invoice = self.pool.get('account.invoice')
@@ -197,7 +232,9 @@ class account_invoice(osv.osv):
     _defaults = {
         'tax_add_invoice': True,
         }
+
     
+    '''    
     def finalize_invoice_move_lines(self, cr, uid, invoice_browse, move_lines):
         """After validate invoice create finalize invoice move lines with shipping amount
         and also manage the debit and credit balance """
@@ -267,6 +304,88 @@ class account_invoice(osv.osv):
             
                 move_lines.append((0,0,lines2))
         return move_lines
+'''
+
+    def finalize_invoice_move_lines(self, move_lines):
+        
+        """After validate invoice create finalize invoice move lines with shipping amount
+        and also manage the debit and credit balance """
+        
+        # Kranbery odoo8 api Adapt
+        invoice_browse = self
+        recs = self.env['account.move.line']
+        uid = recs.env.uid
+        cr = recs.env.cr
+        
+        
+        
+        flag = False
+        account = False
+        #move_lines = super(account_invoice, self).finalize_invoice_move_lines(cr, uid, invoice_browse, move_lines)
+        move_lines = super(account_invoice, self).finalize_invoice_move_lines(move_lines) #kranbery
+        if invoice_browse.type == "out_refund":
+            account = invoice_browse.account_id.id
+        else:
+            if invoice_browse.shipping_lines:
+                for ship_line in invoice_browse.shipping_lines:
+                    flag = True
+                    account = ship_line.sale_account_id.id
+#            account = invoice_browse.sale_account_id.id
+        if flag and invoice_browse.shipping_amt:
+            lines1={
+                    'analytic_account_id' :  False,
+                    'tax_code_id' :  False,
+                    'analytic_lines' :  [],
+                    'tax_amount' :  invoice_browse.shipping_amt,
+                    'name' :  'Shipping Charge',
+                    'ref' : '',
+                    'currency_id' :  False,
+                    'credit' :  invoice_browse.shipping_amt,
+                    'product_id' :  False,
+                    'date_maturity' : False,
+                    'debit' : False,
+                    'date' : time.strftime("%Y-%m-%d"),
+                    'amount_currency' : 0,
+                    'product_uom_id' :  False,
+                    'quantity' : 1,
+                    'partner_id' : invoice_browse.partner_id.id,
+                    'account_id' : account,}
+            
+            move_lines.append((0,0,lines1))
+            # Retrieve the existing debit line if one exists
+            has_entry = False
+            for move_line in move_lines:
+                
+                journal_entry = move_line[2]
+#                if journal_entry['account_id'] == invoice_browse.journal_id.default_debit_account_id.id:
+                if journal_entry['account_id'] == invoice_browse.account_id.id:
+#                if journal_entry['account_id'] == account:   
+                   journal_entry['debit'] += invoice_browse.shipping_amt
+                   has_entry = True
+                   break
+            # If debit line does not exist create one. Generally this condition will not happen. Just a fail-safe option    
+            if not has_entry:
+                lines2={
+                        'analytic_account_id' :  False,
+                        'tax_code_id' :  False,
+                        'analytic_lines' :  [],
+                        'tax_amount' :  False,
+                        'name' :  '/',
+                        'ref' : '',
+                        'currency_id' :  False,
+                        'credit' :  False,
+                        'product_id' :  False,
+                        'date_maturity' : False,
+                        'debit' : invoice_browse.shipping_amt,
+                        'date' : time.strftime("%Y-%m-%d"),
+                        'amount_currency' : 0,
+                        'product_uom_id' :  False,
+                        'quantity' : 1,
+                        'partner_id' : invoice_browse.partner_id.id,
+                        'account_id' : invoice_browse.journal_id.default_debit_account_id.id,}
+            
+                move_lines.append((0,0,lines2))
+        return move_lines    
     
     
     def confirm_paid(self, cr, uid, ids, context=None):
@@ -494,7 +613,7 @@ class account_invoice(osv.osv):
                 account_tax_obj.cancel_tax(cr, uid, avatax_config, invoice.internal_number, doc_type, 'DocVoided')
         self.write(cr, uid, ids, {'number': '', 'internal_number':''})
         return res
-
+    '''
     def check_tax_lines(self, cr, uid, inv, compute_taxes, ait_obj):
         avatax_config_obj = self.pool.get('avalara.salestax')
         avatax_config = avatax_config_obj._get_avatax_config_company(cr, uid)
@@ -533,6 +652,54 @@ class account_invoice(osv.osv):
         else:
             super(account_invoice, self).check_tax_lines(cr, uid, inv, compute_taxes, ait_obj)
         return True
+'''
+    def check_tax_lines(self, compute_taxes):
+        
+        # Kranbery - Adapt new environment
+        inv = self
+        recs = self.env['account.invoice.tax']
+        uid = recs.env.uid
+        cr = recs.env.cr
+        
+        
+        ait_obj = self.pool.get('account.invoice.tax')
+        avatax_config_obj = self.pool.get('avalara.salestax')
+        avatax_config = avatax_config_obj._get_avatax_config_company(cr,uid) # cr, uid  #kranbery
+        partner_obj = self.pool.get('res.partner')
+        c_code = partner_obj.browse(cr, uid, inv.partner_id.id).country_id.code or False
+        
+        cs_code = []        #Countries where Avalara address validation is enabled
+        for c_brw in avatax_config.country_ids:
+            cs_code.append(str(c_brw.code))
+        #invoice type check when avalara config working and supplier invoice refund by default functionality
+        if avatax_config and not avatax_config.disable_tax_calculation and inv.type in ['out_invoice', 'out_refund'] and c_code in cs_code:
+            if not inv.tax_line:
+                for tax in compute_taxes.values():
+                    ait_obj.create(cr, uid, tax)
+            else:
+                tax_key = []
+                for tax in inv.tax_line:
+                    if tax.manual:
+                        continue
+                    key = (tax.tax_code_id.id, tax.base_code_id.id, tax.account_id.id)
+                    
+                    tax_key.append(key)
+                    if not key in compute_taxes:
+                        raise osv.except_osv(_('Warning!'), _('Global taxes defined, but they are not in invoice lines !'))
+                    base = compute_taxes[key]['base']
+                    if abs(base - tax.base) > inv.company_id.currency_id.rounding:
+                        raise osv.except_osv(_('Warning!'), _('Tax base different!\nClick on compute to update the tax base.'))
+                for key in compute_taxes:
+                    if not key in tax_key:
+                        raise osv.except_osv(_('Warning!'), _('Taxes are missing!\nClick on compute button.'))
+            
+                for tax in inv.tax_line:
+                    key = (tax.tax_code_id.id, tax.base_code_id.id, tax.account_id.id)
+                    if abs(compute_taxes[key]['amount'] - tax.amount) > inv.company_id.currency_id.rounding:
+                        raise osv.except_osv(_('Warning !'), _('Tax amount different !\nClick on compute to update tax base'))
+        else:
+            super(account_invoice, self).check_tax_lines(cr, uid, inv, compute_taxes, ait_obj)
+        return True    
             
 account_invoice()
 
@@ -577,6 +744,11 @@ class account_invoice_tax(osv.osv):
         invoice_line_obj = self.pool.get('account.invoice.line')
         ship_order_line = self.pool.get('shipping.order.line')
         
+        #invoice_id = invoice_id.id # kranbery mod
+        # Kranbery update invoice id to check if obj or just id is passed in, adapat to different function calls from new Odoo acct funct
+        if not isinstance(invoice_id, int): #invoice_id.id:
+            invoice_id = invoice_id.id
+            
         invoice = invoice_obj.browse(cr, uid, invoice_id, context=context)
         cur = invoice.currency_id
         company_currency = invoice.company_id.currency_id.id

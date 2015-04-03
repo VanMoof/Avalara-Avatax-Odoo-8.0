@@ -31,7 +31,7 @@ class sale_order(osv.osv):
         also check address validation by avalara  
         """
         
-        res = super(sale_order, self).onchange_partner_id(cr, uid, ids, part, context=None)
+        res = super(sale_order, self).onchange_partner_id(cr, uid, ids, part, context=context)
         res_obj = self.pool.get('res.partner').browse(cr, uid, part, context=context)
         addr = self.pool.get('res.partner').browse(cr, uid, res['value'] and res['value']['partner_shipping_id'] or part)
         res['value']['exemption_code'] = res_obj.exemption_number or ''
@@ -108,7 +108,7 @@ class sale_order(osv.osv):
         shipping tax amount using shipping code 
         """
         inv_id = super(sale_order, self)._make_invoice(cr, uid, order, lines, context=None)
-        if inv_id and order._table_name == 'sale.order':
+        if inv_id: #and order._table_name == 'sale.order': kranbery comment 
             ship_data = []
             for ship_line in order.shipping_lines:
                 

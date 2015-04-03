@@ -72,8 +72,9 @@ class res_partner(osv.osv):
     def check_avatax_support(self, cr, uid, avatax_config, country_id, context=None):
         """ Checks if address validation pre-condition meets. """
 
-        if avatax_config.address_validation:
-            raise osv.except_osv(_('AvaTax: Address Validation is Disabled'), _("The AvaTax Address Validation Service is disabled by the administrator. Please make sure it's enabled for the address validation"))
+        #if avatax_config.address_validation:
+            #raise osv.except_osv(_('AvaTax: Address Validation is Disabled'), _("The AvaTax Address Validation Service is disabled by the administrator. Please make sure it's enabled for the address validation"))
+            
         if country_id and country_id not in [x.id for x in avatax_config.country_ids] or not country_id:
             return False
 #            raise osv.except_osv(_('AvaTax: Address Validation not Supported for this country'), _("The AvaTax Address Validation Service does not support this country in the configuration, please continue with your normal process."))

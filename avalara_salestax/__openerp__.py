@@ -20,7 +20,7 @@
 ##############################################################################
 
 {
-    "name" : "OpenERP Avalara connector for sales tax calculation",
+    "name" : "Avalara connector for sales tax calculation",
     "version" : "8.1.0",
     "author" : 'Kranbery Technologies',
     'summary': 'Quotations, Sales Orders, Invoicing',
@@ -52,7 +52,7 @@ Some important points.
 
 Improvement for version 8.1.0
 
-Refactored for Odoo (OpenERP 8)
+Re-factored for Odoo (OpenERP 8)
 
 
 
