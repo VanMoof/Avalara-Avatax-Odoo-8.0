@@ -4,11 +4,11 @@ import urllib2
 import string
 import os
 import datetime
-import base64
+#import base64
 
-from tools.translate import _
+from openerp.tools.translate import _
 #from osv import osv
-from openerp.osv import fields,osv
+from openerp.osv import osv
 
 class AvaTaxService:
 
@@ -106,7 +106,7 @@ class AvaTaxService:
                 if (w_message._Name == 'TaxAddressError' or w_message._Name == 'AddressRangeError' or  w_message._Name == 'AddressUnknownStreetError' or w_message._Name == 'AddressNotGeocodedError' or w_message._Name == 'NonDeliverableAddressError' ):
                     raise osv.except_osv(_('AvaTax: Warning \n AvaTax could not validate the street address.'), _('You can save the address and AvaTax will make an attempt to compute taxes based on the zip code if "Attempt automatic address validation" is enabled in the Avatax connector configuration.  \n\n Also please ensure that the company address is set and Validated.  You can get there by going to Sales->Customers and removing "Customers" filter from the search at the top.  Then go to your company contact info and validate your address in the Avatax Tab'))
                 else:
-                    raise osv.except_osv(_('AvaTax: Error: '+str(w_message._Name)+" \n\nInformation reported from Avatax Service, please check your information and/or settings in the ERP.\n\n"), _(AvaTaxError(result.ResultCode, result.Messages)))
+                    raise osv.except_osv(_('AvaTax: Error: '+str(w_message._Name)+" \n\nAvatax Service is replying with an invalid address error, please make sure your address information is correct and that your ERP is correctly configured.\n\n"), _(AvaTaxError(result.ResultCode, result.Messages)))
             else:
                 return result
             
@@ -180,7 +180,8 @@ class AvaTaxService:
         for line in range(0, len(received_lines)):
             line1 = self.taxSvc.factory.create('Line')
             line1.Qty = received_lines[line].get('qty', 1)
-            line1.Discounted = False
+            line1.Discounted = False #received_lines[line].get('discounted', None)
+            #line1.Discount = received_lines[line].get('discount', None)
             line1.No = '%d' %line
             line1.ItemCode = received_lines[line].get('itemcode', None)
             line1.Description = received_lines[line].get('description', None)

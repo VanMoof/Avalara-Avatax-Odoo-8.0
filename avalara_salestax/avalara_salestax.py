@@ -19,7 +19,7 @@
 #
 ##############################################################################
 from openerp.osv import fields,osv
-from tools.translate import _
+#from tools.translate import _
 from openerp.addons.decimal_precision import decimal_precision as dp
 
 class tax_schedule(osv.osv):
@@ -109,6 +109,19 @@ class avalara_salestax(osv.osv):
             res['force_address_validation'] = False
             res['result_in_uppercase'] = False
         return {'value': res}
+
+    # treat as radio button 
+    def onchange_disable_tax_calculation(self, cr, uid, dtr_id, context=None):
+        res = {}
+        if dtr_id:
+            res['disable_tax_reporting'] = False
+        return {'value': res}
+    # treat as radio button         
+    def onchange_tax_reporting(self, cr, uid, dtc_id, context=None):
+        res = {}
+        if dtc_id:
+            res['disable_tax_calculation'] = False
+        return {'value': res}
     
     def onchange_system_call1(self, cr, uid, ids, on_order, context=None):
         group_obj = self.pool.get('res.groups')
@@ -144,9 +157,11 @@ class avalara_salestax(osv.osv):
         'address_validation': fields.boolean('Attempt automatic address validation', help="Check to disable address validation"),
         'enable_address_validation': fields.boolean('Enable Address Validation', help="Check to Enable address validation"),
         'result_in_uppercase': fields.boolean('Return validation results in upper case', help="Check is address validation results desired to be in upper case"),
-        'validation_on_save': fields.boolean('Validate on save for customer profile', help="Check if each address when saved should be validated"),
-        'force_address_validation': fields.boolean('Force Address validation on customer profile save', help="Check if address validation should be done before tax calculation"),
-        'disable_tax_calculation': fields.boolean('Disable Tax Calculation', help="Check to disable tax calculation"),
+        'validation_on_save': fields.boolean('Force validate on save for customer profile', help="Validates the address and automatically saves when Customer profile is saved."),
+        #'force_address_validation': fields.boolean('Force Address validation on customer profile save', help="Check if address validation should be done before tax calculation"),
+        'auto_generate_customer_code': fields.boolean('Automatically generate customer code', help="This will generate customer code for customers in the system who do not have codes already created.  Each code is unique per customer.  When this is disabled, you will have to manually go to each customer and manually generate their customer code.  This is required for Avatax and is only generated one time."),                
+        'disable_tax_calculation': fields.boolean('Disable Avalara Tax Calculation and reporting', help="Check to disable avalara tax calculation and reporting"),
+        'disable_tax_reporting': fields.boolean('Disable Avalara Tax reporting only', help="Check to disable avalara tax reporting to Avatax Service.  You will not see the transactions on the Avalara transaction web portal."),
         'default_tax_schedule_id': fields.many2one('tax.schedule', 'Default Tax Schedule', help="Identifies customers using AVATAX. Only customers with AVATAX designation triggers tax calculation from AvaTax otherwise it will follow the normal tax calculation that OpenERP provides"),
         'default_shipping_code_id': fields.many2one('product.tax.code', 'Default Shipping Code', help="The default shipping code which will be passed to Avalara"),
         'country_ids': fields.many2many('res.country', 'avalara_salestax_country_rel', 'avalara_salestax_id', 'country_id', 'Countries', help="Countries where address validation will be used"),
@@ -165,6 +180,7 @@ class avalara_salestax(osv.osv):
         'country_ids': _get_avatax_supported_countries,
         'on_order': True,
         'address_validation': True,
+        'auto_generate_customer_code': True,        
     }
     
     #constraints on uniq records creation with account_number and company_id

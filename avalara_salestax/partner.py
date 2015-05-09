@@ -233,11 +233,20 @@ class res_partner(osv.osv):
                     address['country_id'] = 'country_id' in vals and vals['country_id'] or brw_address.get('country_id') and brw_address['country_id'][0]
                     if self.check_avatax_support(cr, uid, avatax_config, address['country_id'], context=context):
                         if from_write:
-                            address['street'] = 'street' in vals and vals['street'] or ''
-                            address['street2'] = 'street2' in vals and vals['street2'] or ''
-                            address['city'] = 'city' in vals and vals['city'] or ''
-                            address['zip'] = 'zip' in vals and vals['zip'] or ''
+                            address['street'] = 'street' in vals and vals['street'] or brw_address.get('street') or ''
+                            address['street2'] = 'street2' in vals and vals['street2'] or brw_address.get('street2') or ''
+                            address['city'] = 'city' in vals and vals['city'] or brw_address.get('city') or ''
+                            address['zip'] = 'zip' in vals and vals['zip'] or brw_address.get('zip') or ''
                             address['state_id'] = 'state_id' in vals and vals['state_id'] or brw_address.get('state_id') and brw_address['state_id'][0] or False
+                            
+                            
+                            #address['street'] = brw_address.get('street')
+                            #address['street2'] = brw_address.get('street2')
+                            #address['city'] = brw_address.get('city')
+                            #address['zip'] = brw_address.get('zip')
+                            #address['state_id'] = brw_address.get('state_id') and brw_address['state_id'][0] or False
+
+                            
                         valid_address = self._validate_address(cr, uid, address, avatax_config, context=context)
                         vals.update({
                             'street': valid_address.Line1,

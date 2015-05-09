@@ -18,13 +18,13 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-import time
-import string
+#import time
+#import string
 
-from osv import osv, fields
-from tools.translate import _
+from openerp.osv import osv
+#from tools.translate import _
 
-from avalara_api import AvaTaxService, BaseAddress, Line
+from avalara_api import AvaTaxService, BaseAddress #, Line
 
 class account_tax(osv.osv):
     """Inherit to implement the tax using avatax API"""
@@ -41,15 +41,20 @@ class account_tax(osv.osv):
                           lines, user=None, exemption_number=None, exemption_code_name=None, commit=False, invoice_date=False, reference_code=False, location_code=False, context=None):
         address_obj = self.pool.get('res.partner')
         currency_code = self._get_currency(cr, uid, context)
+        #if not partner.customer_code:
+        #    raise osv.except_osv(_('AvaTax: Warning !'), _('Customer Code for customer %s not defined.\n\n  You can edit the Customer Code in customer profile. You can fix by clicking "Generate Customer Code" button in the customer contact information"'% (partner.name)))
         if not partner.customer_code:
-            raise osv.except_osv(_('AvaTax: Warning !'), _('Customer Code for customer %s not defined.\n\n  You can edit the Customer Code in customer profile. You can fix by clicking "Generate Customer Code" button in the customer contact information"'% (partner.name)))
-        
+            if not avatax_config.auto_generate_customer_code:
+                raise osv.except_osv(_('AvaTax: Warning !'), _('Customer Code for customer %s not defined.\n\n  You can edit the Customer Code in customer profile. You can fix by clicking "Generate Customer Code" button in the customer contact information"'% (partner.name)))
+            else:
+                address_obj.generate_cust_code(cr, 1, [partner.id], partner.id) 
+                        
         if not shipping_address_id:
             raise osv.except_osv(_('AvaTax: No Shipping Address Defined !'), _('There is no shipping address defined for the partner.'))        
         #it's show destination address
         shipping_address = address_obj.browse(cr, uid, shipping_address_id, context=context)
         if not lines:
-            raise osv.except_osv(_('AvaTax: Error !'), _('AvaTax needs atleast one sale order line defined for tax calculation.'))
+            raise osv.except_osv(_('AvaTax: Error !'), _('AvaTax needs at least one sale order line defined for tax calculation.'))
         
         #this condition is required, in case user select force address validation on AvaTax API Configuration
         #if (not avatax_config.force_address_validation) and (

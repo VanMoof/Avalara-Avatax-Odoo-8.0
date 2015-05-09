@@ -25,7 +25,7 @@
     "author" : 'Kranbery Technologies',
     'summary': 'Quotations, Sales Orders, Invoicing',
     "description": """ 
-This module helps to calculate sale tax from Avalara while creating Sale Orders or Customer Invoices. 
+The Avatax module helps to calculate sale tax from Avalara while creating Sale Orders or Customer Invoices. 
 Sale tax calculated is based on customer address which needs to be get validated from Avalara before 
 calculating sale tax for particular customer order or invoice.
  

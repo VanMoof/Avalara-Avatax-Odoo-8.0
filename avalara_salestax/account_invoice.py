@@ -55,7 +55,8 @@ def get_address_for_tax(self, cr, uid, ids, context=None):
 class account_invoice(osv.osv):
     """Inherit to implement the tax calculation using avatax API"""
     _inherit = "account.invoice"
-    
+
+    '''    
     def onchange_partner_id(self, cr, uid, ids, type, partner_id,\
             date_invoice=False, payment_term=False, partner_bank_id=False, company_id=False):
         res = super(account_invoice, self).onchange_partner_id(cr, uid, ids, type, partner_id,\
@@ -67,7 +68,19 @@ class account_invoice(osv.osv):
         if res_obj.validation_method:res['value']['is_add_validate'] = True
         else:res['value']['is_add_validate'] = False
         return res
+        '''
+
+    def onchange_partner_id(self, cr, uid, ids, type, partner_id, date_invoice=False, payment_term=False, partner_bank_id=False, company_id=False,context ={}): 
+        res = super(account_invoice, self).onchange_partner_id(cr, uid, ids, type, partner_id,\
+            date_invoice, payment_term, partner_bank_id, company_id)
         
+        res_obj = self.pool.get('res.partner').browse(cr, uid, partner_id)
+        res['value']['exemption_code'] = res_obj.exemption_number or ''
+        res['value']['exemption_code_id'] = res_obj.exemption_code_id.id or None
+        if res_obj.validation_method:res['value']['is_add_validate'] = True
+        else:res['value']['is_add_validate'] = False
+        return res
+            
     
     
     def _amount_all(self, cr, uid, ids, name, args, context=None):
@@ -399,6 +412,10 @@ class account_invoice(osv.osv):
         o_tax_amt = 0.0
         s_tax_amt = 0.0
         
+        # Bypass reporting
+        if avatax_config and avatax_config.disable_tax_reporting:
+            return True        
+        
         for invoice in self.browse(cr, uid, ids, context=context):
             c_code = partner_obj.browse(cr, uid, invoice.partner_id.id).country_id.code or False
             cs_code = []        #Countries where Avalara address validation is enabled
@@ -428,6 +445,7 @@ class account_invoice(osv.osv):
         partner_obj = self.pool.get('res.partner')
         invoice_obj = self.pool.get('account.invoice.line')
         ship_order_line = self.pool.get('shipping.order.line')
+        customer_date_validation = False
         
         avatax_config = avatax_config_obj._get_avatax_config_company(cr, uid)
         if not avatax_config:
@@ -435,6 +453,12 @@ class account_invoice(osv.osv):
         for invoice in self.browse(cr, uid, ids, context=context):
             c_code = partner_obj.browse(cr, uid, invoice.partner_id.id).country_id.code or False
             cs_code = []        #Countries where Avalara address validation is enabled
+            
+            # Check partner address is valid
+            customer_date_validation = partner_obj.browse(cr, uid, invoice.partner_id.id).date_validation
+            if not customer_date_validation and not avatax_config.disable_tax_calculation:
+                raise osv.except_osv(_('Address Validation Error'), _('Customer does not have validated address or address is missing.  Make sure to Validate the customer\'s address in the AvaTax tab on the customer\'s settings.'))
+                            
             for c_brw in avatax_config.country_ids:
                 cs_code.append(str(c_brw.code))
             if avatax_config and not avatax_config.disable_tax_calculation and c_code in cs_code:
@@ -462,10 +486,14 @@ class account_invoice(osv.osv):
         partner_obj = self.pool.get('res.partner')
         invoice_obj = self.pool.get('account.invoice.line')
         ship_order_line = self.pool.get('shipping.order.line')
-        
+                
         avatax_config = avatax_config_obj._get_avatax_config_company(cr, uid)
         o_tax_amt = 0.0
         s_tax_amt = 0.0
+
+        if avatax_config and avatax_config.disable_tax_reporting:
+            return True
+                
         for invoice in self.browse(cr, uid, ids, context=context):
             c_code = partner_obj.browse(cr, uid, invoice.partner_id.id).country_id.code or False
             cs_code = []        #Countries where Avalara address validation is enabled
@@ -538,10 +566,25 @@ class account_invoice(osv.osv):
     def create_lines(self, cr, uid, invoice_lines, sign):
         lines = []
         for line in invoice_lines:
+            
+            # Add UPC to product item code           
+            if line.product_id.ean13:
+                item_code = line.product_id.ean13 + ":" + line.product_id.default_code 
+            else:
+                item_code = line.product_id.default_code
+           
+            # Calculate discount amount
+            discount_amount = 0.0
+            is_discounted = False
+            if line.discount != 0.0 or line.discount != None: 
+                discount_amount = sign * line.price_unit * ((line.discount or 0.0)/100.0) * line.quantity,
+                is_discounted = True
             lines.append({
                 'qty': line.quantity,
-                'itemcode': line.product_id and line.product_id.default_code or None,
+                'itemcode': line.product_id and item_code or None,
                 'description': line.name,
+                'discounted': is_discounted,
+                'discount': discount_amount[0],
                 'amount': sign * line.price_unit * (1-(line.discount or 0.0)/100.0) * line.quantity,
                 'tax_code': line.product_id and ((line.product_id.tax_code_id and line.product_id.tax_code_id.name) or
                         (line.product_id.categ_id.tax_code_id  and line.product_id.categ_id.tax_code_id.name)) or None
@@ -698,7 +741,8 @@ class account_invoice(osv.osv):
                     if abs(compute_taxes[key]['amount'] - tax.amount) > inv.company_id.currency_id.rounding:
                         raise osv.except_osv(_('Warning !'), _('Tax amount different !\nClick on compute to update tax base'))
         else:
-            super(account_invoice, self).check_tax_lines(cr, uid, inv, compute_taxes, ait_obj)
+            #super(account_invoice, self).check_tax_lines(cr, uid, inv, compute_taxes, ait_obj)
+            super(account_invoice, self).check_tax_lines(compute_taxes)
         return True    
             
 account_invoice()
@@ -761,6 +805,14 @@ class account_invoice_tax(osv.osv):
         o_tax_amt = 0.0
         s_tax_amt = 0.0
         partner_obj = self.pool.get('res.partner')
+        customer_date_validation = False
+        
+        # Check partner address is valid
+        customer_date_validation = partner_obj.browse(cr, uid, invoice.partner_id.id).date_validation
+        if not customer_date_validation and not avatax_config.disable_tax_calculation:
+            raise osv.except_osv(_('Address Validation Error'), _('Customer does not have validated address or address is missing.  Make sure to Validate the customer\'s address in the AvaTax tab on the customer\'s settings.'))
+        
+        
         c_code = partner_obj.browse(cr, uid, invoice.partner_id.id).country_id.code or False
         cs_code = []        #Countries where Avalara address validation is enabled
         for c_brw in avatax_config.country_ids:
@@ -922,7 +974,7 @@ class account_invoice_tax(osv.osv):
                         val['account_analytic_id'] = tax['account_analytic_paid_id']
                         val['ref_base_sign'] = tax['ref_base_sign']
     
-                    key = (val['tax_code_id'], val['base_code_id'], val['account_id'], val['account_analytic_id'])
+                    key = (val['tax_code_id'], val['base_code_id'], val['account_id'])   # removed optional Analytic ID  , val['account_analytic_id']
                     if not key in tax_grouped:
                         tax_grouped[key] = val
                     else:

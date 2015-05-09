@@ -294,6 +294,7 @@ class sale_order(osv.osv):
         o_tax_amt = 0.0
         s_tax_amt = 0.0
         lines = []
+        customer_date_validation = False
         
         # Make sure Avatax is configured
         if not avatax_config:
@@ -303,6 +304,12 @@ class sale_order(osv.osv):
             cs_code = []        #Countries where Avalara address validation is enabled
             for c_brw in avatax_config.country_ids:
                 cs_code.append(str(c_brw.code))
+                
+            # Check partner address is valid
+            customer_date_validation = partner_obj.browse(cr, uid, order.partner_id.id).date_validation
+            if not customer_date_validation and not avatax_config.disable_tax_calculation:
+                raise osv.except_osv(_('Address Validation Error'), _('Customer does not have validated address or address is missing.  Make sure to Validate the customer\'s address in the AvaTax tab on the customer\'s settings.'))
+                                            
             if avatax_config and not avatax_config.disable_tax_calculation and c_code in cs_code:
                 shipping_add_id = self.get_address_for_tax(cr, uid, ids, context)
                 
