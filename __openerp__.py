@@ -20,7 +20,7 @@
 ##############################################################################
 
 {
-    "name" : "Avalara connector for sales tax calculation",
+    "name" : "Avalara Avatax connector for sales tax calculation",
     "version" : "8.1.0",
     "author" : 'Kranbery Technologies',
     'summary': 'Quotations, Sales Orders, Invoicing',
