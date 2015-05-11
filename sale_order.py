@@ -296,10 +296,22 @@ class sale_order(osv.osv):
         lines = []
         customer_date_validation = False
         
+       
+        
+        
         # Make sure Avatax is configured
         if not avatax_config:
             raise osv.except_osv(_('AvaTax: Error'), _('Your Avatax Countries settings are not configured. You need a country code in the Countries section.  \nIf you have a multi-company installation, you must add settings for each company.  \n\nYou can update settings in Avatax->Avatax API.'))
         for order in self.browse(cr, uid, ids):
+            
+             # ship from Address / Origin Address either warehouse or company if none
+            if not order.warehouse_id.partner_id.id:
+                ship_from_address_id = order.company_id.partner_id.id
+            else:
+                ship_from_address_id = order.warehouse_id.partner_id.id
+                
+            
+            
             c_code = partner_obj.browse(cr, uid, order.partner_id.id).country_id.code or False
             cs_code = []        #Countries where Avalara address validation is enabled
             for c_brw in avatax_config.country_ids:
@@ -321,7 +333,7 @@ class sale_order(osv.osv):
                     #tax based on individual order line 
                     for line1, o_line in zip(lines1, order.order_line):
                         ol_tax_amt =  account_tax_obj._get_compute_tax(cr, uid, avatax_config, order.date_confirm or order.date_order,
-                                                                    order.name, 'SalesOrder', order.partner_id, order.company_id.partner_id.id,
+                                                                    order.name, 'SalesOrder', order.partner_id, ship_from_address_id,
                                                                     shipping_add_id, [line1], order.user_id, order.exemption_code or None, order.exemption_code_id.code or None, 
                                                                     context=context).TotalTax
                         o_tax_amt += ol_tax_amt  #tax amount based on total order line total   
@@ -330,7 +342,7 @@ class sale_order(osv.osv):
                     #tax based on individual shipping order line
                     for line2, s_line in zip(lines2, order.shipping_lines):
                         sl_tax_amt = account_tax_obj._get_compute_tax(cr, uid, avatax_config, order.date_confirm or order.date_order,
-                                                                    order.name, 'SalesOrder', order.partner_id, order.company_id.partner_id.id,
+                                                                    order.name, 'SalesOrder', order.partner_id, ship_from_address_id,
                                                                     shipping_add_id, [line2], order.user_id, order.exemption_code or None, order.exemption_code_id.code or None,
                                                                     context=context).TotalTax
                         s_tax_amt += sl_tax_amt #tax amount based on total shipping line total
@@ -342,7 +354,7 @@ class sale_order(osv.osv):
                     lines1.extend(lines2)
                    
                     tax_amount = account_tax_obj._get_compute_tax(cr, uid, avatax_config, order.date_confirm or order.date_order,
-                                                                    order.name, 'SalesOrder', order.partner_id, order.company_id.partner_id.id,
+                                                                    order.name, 'SalesOrder', order.partner_id, ship_from_address_id,
                                                                     shipping_add_id, lines1, order.user_id, order.exemption_code or None, order.exemption_code_id.code or None,
                                                                     context=context).TotalTax
                                                                     

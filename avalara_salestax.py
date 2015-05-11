@@ -180,7 +180,8 @@ class avalara_salestax(osv.osv):
         'country_ids': _get_avatax_supported_countries,
         'on_order': True,
         'address_validation': True,
-        'auto_generate_customer_code': True,        
+        'auto_generate_customer_code': True,    
+        'disable_tax_calculation' : False,    
     }
     
     #constraints on uniq records creation with account_number and company_id

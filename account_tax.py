@@ -22,7 +22,7 @@
 #import string
 
 from openerp.osv import osv
-#from tools.translate import _
+from openerp.tools.translate import _
 
 from avalara_api import AvaTaxService, BaseAddress #, Line
 
@@ -49,6 +49,7 @@ class account_tax(osv.osv):
             else:
                 address_obj.generate_cust_code(cr, 1, [partner.id], partner.id) 
                         
+                        
         if not shipping_address_id:
             raise osv.except_osv(_('AvaTax: No Shipping Address Defined !'), _('There is no shipping address defined for the partner.'))        
         #it's show destination address
@@ -63,6 +64,7 @@ class account_tax(osv.osv):
             if not shipping_address.date_validation:
                 raise osv.except_osv(_('AvaTax: Address Not Validated !'), _('Please validate the shipping address for the partner %s.'
                             % (partner.name)))
+
 
 
         if not ship_from_address_id:
