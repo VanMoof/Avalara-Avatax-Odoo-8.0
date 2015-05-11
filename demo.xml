@@ -2,7 +2,7 @@
 <openerp>
 	<data noupdate="1">
 		<record id="avalara_salestax_0" model="avalara.salestax">
-			<field name="company_code">KBTLLC</field>
+			<field name="company_code">Contact Avalara: 877-780-4848</field>
 			<field name="create_date">2015-03-25 14:47:51</field>
 			<field name="write_date">2015-05-08 01:50:59</field>
 			<field eval="[(6,0,[ref('base.us')])]" name="country_ids"/>
@@ -20,12 +20,12 @@
 			<field eval="0" name="enable_address_validation"/>
 			<field eval="0" name="on_line"/>
 			<field eval="1" name="active"/>
-			<field name="license_key">DC5C3E2BDB091676</field>
+			<field name="license_key"></field>
 			<field eval="0" name="validation_on_save"/>
 			<field eval="0" name="logging"/>
 			<field eval="1" name="on_order"/>
 			<field eval="0" name="disable_tax_calculation"/>
-			<field name="account_number">1100115007</field>
+			<field name="account_number"></field>
 			<field eval="1" name="auto_generate_customer_code"/>
 		</record>
 	</data>
