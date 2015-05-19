@@ -172,6 +172,7 @@ class avalara_salestax(osv.osv):
 #        'vat_id': fields.integer('VAT ID', help="The Business Identification Number assigned to a non-U.S. company. This is normally the BIN or VAT number."),
         'on_line': fields.boolean('Line-level', help="It will calculate tax line by line and also show."),
         'on_order': fields.boolean('Order-level', help="It will calculate tax for order not line by line."),
+        'upc_enable': fields.boolean('Enable UPC Taxability', help="Allows ean13 to be reported in place of Item Reference as upc identifier."),
         
     }
     _defaults = {
@@ -183,6 +184,7 @@ class avalara_salestax(osv.osv):
         'address_validation': True,
         'auto_generate_customer_code': True,    
         'disable_tax_calculation' : False,    
+        'disable_tax_calculation' : False, 
     }
     
     #constraints on uniq records creation with account_number and company_id

@@ -43,6 +43,7 @@
                             <group colspan="2" col="2" expand="1" string="System Calls">
                                 <field name="on_order" on_change="onchange_system_call1(on_order)"/>
                                 <field name="on_line" on_change="onchange_system_call2(on_line)"/>
+                                <field name="upc_enable" />
                             </group>
                             </group>
                             <group>
