@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 OpenERP SA (<http://www.openerp.com>)
+#    Odoo, Open Source Management Solution
+#    Copyright (C) 2004-2010 Odoo SA (<http://www.openerp.com>)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -36,13 +36,13 @@ This module has Following Features:
 3. Handling of Customer Refunds.
 4. Customer Exemption handling. 
 5. Calculation of Shipping Cost tax. 
-6. Use both Avalara and OpenERP Taxes etc.
+6. Use both Avalara and Odoo Taxes etc.
                      
 Some important points. 
 
 1. Prior Using this module make sure you have Avalara admin console login for configuring your avalara settings https://www.avalara.com.
 
-2. Once module is installed configure your Avalara setting in OpenERP under "Accounting/Configuration/AvaTax".
+2. Once module is installed configure your Avalara setting in Odoo under "Accounting/Configuration/AvaTax".
 
 3. Default Tax will be created make sure you configure it correctly under "Accounting/Configuration/Tax"
 
@@ -52,7 +52,7 @@ Some important points.
 
 Improvement for version 8.1.0
 
-Re-factored for Odoo (OpenERP 8)
+Re-factored for Odoo (Odoo 8)
 
 
 
