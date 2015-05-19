@@ -277,7 +277,7 @@ class account_invoice(osv.osv):
         
 
     _columns = {
-        'invoice_doc_no': fields.char('Invoice No', size=32, readonly=True, states={'draft':[('readonly',False)]}, help="Reference of the invoice"),
+        'invoice_doc_no': fields.char('Source/Ref Invoice No', size=32, readonly=True, states={'draft':[('readonly',False)]}, help="Reference of the invoice"),
         'invoice_date': fields.date('Invoice Date', readonly=True),
         'is_add_validate': fields.boolean('Address validated',),
         
@@ -311,7 +311,7 @@ class account_invoice(osv.osv):
         'tax_add_default': fields.boolean('Default Address', readonly=True, states={'draft':[('readonly',False)]}),
         'tax_add_invoice': fields.boolean('Invoice Address', readonly=True, states={'draft':[('readonly',False)]}),
         'tax_add_shipping': fields.boolean('Delivery Address', readonly=True, states={'draft':[('readonly',False)]}),
-#        'shipping_add_id': fields.many2one('res.partner', 'Tax Address', change_default=True, track_visibility='always'),
+        'shipping_add_id': fields.many2one('res.partner', 'Tax Address', change_default=True, track_visibility='always'),
         'shipping_address': fields.text('Tax Address'),
         'location_code': fields.char('Location code', size=128, readonly=True, states={'draft':[('readonly',False)]}),  
         'warehouse_id': fields.many2one('stock.warehouse', 'Warehouse'),
@@ -656,11 +656,14 @@ class account_invoice(osv.osv):
         return lines
 
     def create_lines(self, cr, uid, invoice_lines, sign):
+        
+        avatax_config_obj = self.pool.get('avalara.salestax')       
+        avatax_config = avatax_config_obj._get_avatax_config_company(cr, uid)
         lines = []
         for line in invoice_lines:
             
             # Add UPC to product item code           
-            if line.product_id.ean13:
+            if line.product_id.ean13 and avatax_config.upc_enable:
                 item_code =  "upc:" + line.product_id.ean13
             else:
                 item_code = line.product_id.default_code
