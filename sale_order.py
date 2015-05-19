@@ -255,14 +255,22 @@ class sale_order(osv.osv):
     def create_lines(self, cr, uid, order_lines):
         """ Tax line creation for calculating tax amount using avalara tax code. """
         lines = []
+        
+
+        
         for line in order_lines:
+
+            if line.product_id.tax_apply:
+                tax_code = line.product_id and (line.product_id.tax_code_id and line.product_id.tax_code_id.name)
+            else:
+                tax_code = (line.product_id.categ_id.tax_code_id  and line.product_id.categ_id.tax_code_id.name) or None
+                            
             lines.append({
                 'qty': line.product_uom_qty,
                 'itemcode': line.product_id and line.product_id.default_code or None,
                 'description': line.product_id.description or None,
                 'amount': line.price_unit * (1-(line.discount or 0.0)/100.0) * line.product_uom_qty,
-                'tax_code': line.product_id and ((line.product_id.tax_code_id and line.product_id.tax_code_id.name) or
-                        (line.product_id.categ_id.tax_code_id  and line.product_id.categ_id.tax_code_id.name)) or None
+                'tax_code': tax_code
             })
         return lines
     

@@ -108,6 +108,7 @@ class avalara_salestax(osv.osv):
             res['validation_on_save'] = False
             res['force_address_validation'] = False
             res['result_in_uppercase'] = False
+            
         return {'value': res}
 
     # treat as radio button 

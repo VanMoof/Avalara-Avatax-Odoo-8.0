@@ -661,9 +661,16 @@ class account_invoice(osv.osv):
             
             # Add UPC to product item code           
             if line.product_id.ean13:
-                item_code = line.product_id.ean13 + ":" + line.product_id.default_code 
+                item_code =  "upc:" + line.product_id.ean13
             else:
                 item_code = line.product_id.default_code
+                
+            # Get Tax Code 
+            if line.product_id.tax_apply:
+                tax_code = line.product_id and (line.product_id.tax_code_id and line.product_id.tax_code_id.name)
+            else:
+                tax_code = (line.product_id.categ_id.tax_code_id  and line.product_id.categ_id.tax_code_id.name) or None
+    
            
             # Calculate discount amount
             discount_amount = 0.0
@@ -678,8 +685,7 @@ class account_invoice(osv.osv):
                 'discounted': is_discounted,
                 'discount': discount_amount[0],
                 'amount': sign * line.price_unit * (1-(line.discount or 0.0)/100.0) * line.quantity,
-                'tax_code': line.product_id and ((line.product_id.tax_code_id and line.product_id.tax_code_id.name) or
-                        (line.product_id.categ_id.tax_code_id  and line.product_id.categ_id.tax_code_id.name)) or None
+                'tax_code': tax_code
             })
         return lines
     
@@ -847,14 +853,19 @@ class account_invoice_tax(osv.osv):
     def create_lines(self, cr, uid, order_lines):
        lines = []
        for line in order_lines:
-           lines.append({
+
+            if line.product_id.tax_apply:
+                tax_code = line.product_id and (line.product_id.tax_code_id and line.product_id.tax_code_id.name)
+            else:
+                tax_code = (line.product_id.categ_id.tax_code_id  and line.product_id.categ_id.tax_code_id.name) or None
+           
+            lines.append({
                'qty': line.quantity,
                'itemcode': line.product_id and line.product_id.default_code or None,
                'description': line.name,
                'amount': line.price_unit * (1-(line.discount or 0.0)/100.0) * line.quantity,
-               'tax_code': line.product_id and ((line.product_id.tax_code_id and line.product_id.tax_code_id.name) or
-                       (line.product_id.categ_id.tax_code_id  and line.product_id.categ_id.tax_code_id.name)) or None
-           })
+               'tax_code': tax_code
+            })
        return lines
    
     def create_shipping_lines(self, cr, uid, shipping_lines):
