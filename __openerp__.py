@@ -61,11 +61,8 @@ Note: Make sure you have proper internet connection.
 """,
     "category" : "Generic Modules/Accounting",
     "website" : "http://www.kranbery.com/",
-    "depends" : [ 'base','sale','account','account_accountant','stock','sale_stock'], #'sale_stock','account_accountant','stock' ,'account','sale_stock'
-    #"images" : [ 'images/screenshot.png'],
-    "init_xml" : [],
-    "demo_xml" : [],
-    "update_xml" : [
+    "depends" : [ 'base','sale','account','account_accountant','stock','sale_stock'],
+    "data" : [
     "wizard/avalara_salestax_ping_view.xml",
     "wizard/avalara_salestax_address_validate_view.xml",
     "avalara_salestax_view.xml",
@@ -79,14 +76,15 @@ Note: Make sure you have proper internet connection.
     "security/avalara_salestax_security.xml",
     "security/ir.model.access.csv",
     ],
+    'demo': [
+        'demo.xml',
+    ],    
     "test" : [],
     'installable': True,
     'auto_install': False,
     'application': True,
    
-    'demo': [
-        'demo.xml',
-    ],
+
     
 }
 
