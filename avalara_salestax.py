@@ -127,15 +127,17 @@ class avalara_salestax(osv.osv):
     
     def onchange_system_call1(self, cr, uid, ids, on_order, context=None):
         res = {}
-        res['on_order'] = True
-        res['on_line'] = False            
+        if on_order:
+            res['on_order'] = on_order
+            res['on_line'] = False            
         return {'value': res}
 
         
     def onchange_system_call2(self, cr, uid, ids, on_line, context=None):
         res = {}
-        res['on_order'] = False
-        res['on_line'] = True            
+        if on_line:
+            res['on_order'] = False
+            res['on_line'] = on_line            
         return {'value': res}                    
 
 

@@ -40,7 +40,7 @@
                               <field name="result_in_uppercase" /> <!--  attrs="{'readonly': [('address_validation','!=', False)]}"  -->
                               <field name="auto_generate_customer_code" />
                             </group>
-                            <group colspan="2" col="2" expand="1" string="System Calls">
+                            <group colspan="2" col="2" expand="1" string="Avalara Submissions & Transactions">
                                 <field name="on_order" on_change="onchange_system_call1(on_order)"/>
                                 <field name="on_line" on_change="onchange_system_call2(on_line)"/>
                                 <field name="upc_enable" />
@@ -50,7 +50,7 @@
                               <separator string="Countries" colspan="4"/><label string="Countries Authorized to Process (ISO code)" colspan="2"/>
                               <field name="country_ids" colspan="4" nolabel="1"/>
 		                  	</group>
-		                  	<group colspan="4" col="4" string="Tax Calculation">
+		                  	<group colspan="4" col="4" string="Disable">
 		                    	<field name="disable_tax_calculation" on_change="onchange_disable_tax_calculation(disable_tax_calculation)"/>
 		                    	<field name="disable_tax_reporting" on_change="onchange_tax_reporting(disable_tax_reporting)"/>		                    	
 		                     </group>
