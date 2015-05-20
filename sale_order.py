@@ -314,7 +314,7 @@ class sale_order(osv.osv):
             raise osv.except_osv(_('AvaTax: Error'), _('Your Avatax Countries settings are not configured. You need a country code in the Countries section.  \nIf you have a multi-company installation, you must add settings for each company.  \n\nYou can update settings in Avatax->Avatax API.'))
         for order in self.browse(cr, uid, ids):
             
-             # ship from Address / Origin Address either warehouse or company if none
+            # ship from Address / Origin Address either warehouse or company if none
             if not order.warehouse_id.partner_id.id:
                 ship_from_address_id = order.company_id.partner_id.id
             else:

@@ -181,8 +181,7 @@ class AvaTaxService:
         for line in range(0, len(received_lines)):
             line1 = self.taxSvc.factory.create('Line')
             line1.Qty = received_lines[line].get('qty', 1)
-            line1.Discounted = False #received_lines[line].get('discounted', None)
-            #line1.Discount = received_lines[line].get('discount', None)
+            line1.Discounted = False
             line1.No = '%d' %line
             line1.ItemCode = received_lines[line].get('itemcode', None)
             line1.Description = received_lines[line].get('description', None)

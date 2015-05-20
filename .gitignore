@@ -19,6 +19,11 @@
 *.rar
 *.tar
 *.zip
+
+# Source Control #
+##################
+
+*.bzr
  
 # Logs and databases #
 ######################
@@ -41,3 +46,13 @@ Thumbs.db
 .sass-cache/
 .codekit-config.json
 config.codekit
+Iconr
+
+# Eclipse #
+######################
+.project
+.pydevproject
+
+# Python #
+######################
+*.pyc

@@ -73,7 +73,6 @@ class product_template(osv.osv):
     
     _columns = {
         'tax_code_id': fields.many2one('product.tax.code', 'Product Tax Code', help="AvaTax Product Tax Code"),
-#        'tax_code_id': fields.related('categ_id', 'tax_code_id', type="many2one", relation="product.tax.code", string="Tax Code", store=True, help="AvaTax Tax Code"),
         'tax_apply': fields.boolean('Tax Calculation',help="Use Following Tax code for this Product"),
     }
 

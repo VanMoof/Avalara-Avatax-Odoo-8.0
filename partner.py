@@ -23,15 +23,6 @@
 import time
 from openerp.osv import fields,osv
 from openerp.tools.translate import _
-#import openerp.addons.decimal_precision as dp
-
-
-#import time
-
-#from osv import osv, fields
-#from tools.translate import _
-#import decimal_precision as dp
-#import time
 from random import random
 
 from avalara_api import AvaTaxService, BaseAddress
@@ -64,17 +55,14 @@ class res_partner(osv.osv):
     
     def generate_cust_code(self, cr, uid, ids, partner_id, context=None):
         
-         #Auto populate customer code
+        #Auto populate customer code
         customer_code = str(int(time.time()))+'-'+str(int(random()*10))+'-'+'Cust-'+str(ids[0])                
         self.write(cr, uid, ids, {'customer_code': customer_code})
         
         
     def check_avatax_support(self, cr, uid, avatax_config, country_id, context=None):
         """ Checks if address validation pre-condition meets. """
-
-        #if avatax_config.address_validation:
-            #raise osv.except_osv(_('AvaTax: Address Validation is Disabled'), _("The AvaTax Address Validation Service is disabled by the administrator. Please make sure it's enabled for the address validation"))
-            
+         
         if country_id and country_id not in [x.id for x in avatax_config.country_ids] or not country_id:
             return False
 #            raise osv.except_osv(_('AvaTax: Address Validation not Supported for this country'), _("The AvaTax Address Validation Service does not support this country in the configuration, please continue with your normal process."))
@@ -239,14 +227,6 @@ class res_partner(osv.osv):
                             address['zip'] = 'zip' in vals and vals['zip'] or brw_address.get('zip') or ''
                             address['state_id'] = 'state_id' in vals and vals['state_id'] or brw_address.get('state_id') and brw_address['state_id'][0] or False
                             
-                            
-                            #address['street'] = brw_address.get('street')
-                            #address['street2'] = brw_address.get('street2')
-                            #address['city'] = brw_address.get('city')
-                            #address['zip'] = brw_address.get('zip')
-                            #address['state_id'] = brw_address.get('state_id') and brw_address['state_id'][0] or False
-
-                            
                         valid_address = self._validate_address(cr, uid, address, avatax_config, context=context)
                         vals.update({
                             'street': valid_address.Line1,
@@ -305,14 +285,6 @@ class res_partner(osv.osv):
                             'validation_method': 'avatax',
                             'validated_on_save': True
                         })
-                        
-
-         
-        
-        
-        #customer_code = str(int(time.time()))+'-'+str(int(random()*10))+'-'+'Cust-' 
-         
-        #vals['customer_code'] =  customer_code
          
         # execute the create                
         cust_id = super(res_partner, self).create(cr, uid, vals, context)
@@ -344,7 +316,6 @@ class res_partner(osv.osv):
         # Follow the normal write process if it's a write operation from the wizard
         if context.get('from_validate_button', False):
             return super(res_partner, self).write(cr, uid, ids, vals, context)
-#        if context.get('active_id', False):
         vals1 = self.update_address(cr, uid, ids, vals, True, context=context)
         return super(res_partner, self).write(cr, uid, ids, vals1, context)
     

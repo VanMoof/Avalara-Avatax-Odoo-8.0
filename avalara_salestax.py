@@ -19,8 +19,7 @@
 #
 ##############################################################################
 from openerp.osv import fields,osv
-#from tools.translate import _
-from openerp.addons.decimal_precision import decimal_precision as dp
+
 
 class tax_schedule(osv.osv):
     _name = "tax.schedule"
@@ -128,26 +127,15 @@ class avalara_salestax(osv.osv):
     
     def onchange_system_call1(self, cr, uid, ids, on_order, context=None):
         res = {}
-        #group_obj = self.pool.get('res.groups')
-        #dataobj = self.pool.get('ir.model.data')
-        if on_order:
-            #group_id = dataobj.get_object_reference(cr, uid, 'avalara_salestax', 'group_avatax_view')
-            #group_obj.write(cr, uid, [group_id[1]], {'users': [(6,0,[])]})
-            res['on_order'] = True
-            res['on_line'] = False            
+        res['on_order'] = True
+        res['on_line'] = False            
         return {'value': res}
 
         
     def onchange_system_call2(self, cr, uid, ids, on_line, context=None):
         res = {}
-        #group_obj = self.pool.get('res.groups')
-        #dataobj = self.pool.get('ir.model.data')
-        #user_ids = self.pool.get('res.users').search(cr, uid, [])
-        if on_line:
-            #group_id = dataobj.get_object_reference(cr, uid, 'avalara_salestax', 'group_avatax_view')
-            #group_obj.write(cr, uid, [group_id[1]], {'users': [(6,0,user_ids)]})
-            res['on_order'] = False
-            res['on_line'] = True            
+        res['on_order'] = False
+        res['on_line'] = True            
         return {'value': res}                    
 
 
@@ -174,8 +162,6 @@ class avalara_salestax(osv.osv):
         'country_ids': fields.many2many('res.country', 'avalara_salestax_country_rel', 'avalara_salestax_id', 'country_id', 'Countries', help="Countries where address validation will be used"),
         'active': fields.boolean('Active', help="Uncheck the active field to hide the record"),
         'company_id': fields.many2one('res.company', 'Company', required=True, help="Company which has subscribed to the AvaTax service"),
-#        'business_id': fields.integer('Business ID', help="The Business TIN or Taxpayer ID is a unique nine digit identifier assigned to U.S. companies for tax reporting purposes."),
-#        'vat_id': fields.integer('VAT ID', help="The Business Identification Number assigned to a non-U.S. company. This is normally the BIN or VAT number."),
         'on_line': fields.boolean('Line-level', help="It will calculate tax line by line and also show."),
         'on_order': fields.boolean('Order-level', help="It will calculate tax for order not line by line."),
         'upc_enable': fields.boolean('Enable UPC Taxability', help="Allows ean13 to be reported in place of Item Reference as upc identifier."),

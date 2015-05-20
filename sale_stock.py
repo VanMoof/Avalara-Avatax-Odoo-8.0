@@ -32,8 +32,6 @@ class sale_order(osv.osv):
         val = res
         if warehouse_id:
             warehouse = self.pool.get('stock.warehouse').browse(cr, uid, warehouse_id, context=context)
-            #if warehouse.company_id:
-            #    val['company_id'] = warehouse.company_id.id
             if warehouse.code:
                 val['location_code'] = warehouse.code
 

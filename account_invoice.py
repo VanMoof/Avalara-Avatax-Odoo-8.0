@@ -43,14 +43,7 @@ def get_address_for_tax(self, cr, uid, ids, context=None):
             if not sale_ids:
                 inv_ids = self.pool.get('account.invoice').search(cr, uid, [('number','=',so_origin)], context=context)  
                 for invoice in self.pool.get('account.invoice').browse(cr, uid, inv_ids, context):
-                    #if invoice.tax_add_invoice:
-                    #    return invoice.partner_id.partner_invoice_id.id
-                    #elif invoice.tax_add_shipping:
-                    #    return invoice.partner_id.partner_shipping_id.id
-                    #elif invoice.tax_add_default:
                     return invoice.partner_id.id
-                    #else:
-                    #    raise osv.except_osv(_('AvaTax: Warning !'), _('Please select address for avalara tax'))
                 else:
                     return inv_obj.partner_id.id                
                 
@@ -119,20 +112,6 @@ class account_invoice(osv.osv):
     """Inherit to implement the tax calculation using avatax API"""
     _inherit = "account.invoice"
 
-    '''    
-    def onchange_partner_id(self, cr, uid, ids, type, partner_id,\
-            date_invoice=False, payment_term=False, partner_bank_id=False, company_id=False):
-        res = super(account_invoice, self).onchange_partner_id(cr, uid, ids, type, partner_id,\
-            date_invoice, payment_term, partner_bank_id, company_id)
-        
-        res_obj = self.pool.get('res.partner').browse(cr, uid, partner_id)
-        res['value']['exemption_code'] = res_obj.exemption_number or ''
-        res['value']['exemption_code_id'] = res_obj.exemption_code_id.id or None
-        if res_obj.validation_method:res['value']['is_add_validate'] = True
-        else:res['value']['is_add_validate'] = False
-        return res
-        '''
-
     def onchange_partner_id(self, cr, uid, ids, type, partner_id, date_invoice=False, payment_term=False, partner_bank_id=False, company_id=False,context ={}): 
         res = super(account_invoice, self).onchange_partner_id(cr, uid, ids, type, partner_id,\
             date_invoice, payment_term, partner_bank_id, company_id)
@@ -178,17 +157,7 @@ class account_invoice(osv.osv):
             res[invoice.id]['amount_total'] = res[invoice.id]['amount_untaxed'] + res[invoice.id]['amount_tax'] + res[invoice.id]['shipping_amt']                
                 
             #res[invoice.id]['amount_total'] = res[invoice.id]['amount_tax'] + res[invoice.id]['amount_untaxed']        
-            return res
-        
-        '''        
-        #res = super(account_invoice, self)._amount_all(cr, uid, ids, name, args, context=context)
-        for invoice in self.browse(cr, uid, ids, context=context):
-            res[invoice.id]['shipping_amt'] = 0.0
-            for ship_line in invoice.shipping_lines:
-                 res[invoice.id]['shipping_amt'] += ship_line.shipping_cost
-            res[invoice.id]['amount_total'] = res[invoice.id]['amount_untaxed'] + res[invoice.id]['amount_tax'] + res[invoice.id]['shipping_amt']
-'''
-        
+            return res      
     
     def _get_invoice_tax(self, cr, uid, ids, context=None):
         #invoice = self.pool.get('account.invoice')
@@ -242,8 +211,7 @@ class account_invoice(osv.osv):
                 vals['exemption_code_id'] = vals['exemption_code_id']
             else:
                 vals['exemption_code_id'] = res_obj.exemption_code_id and res_obj.exemption_code_id.id or False
-#            vals['exemption_code'] = res_obj.exemption_number or ''
-#            vals['exemption_code_id'] = res_obj.exemption_code_id.id or None
+
             
             sale_obj = self.pool.get('sale.order')           
             sale_ids = sale_obj.search(cr, uid, [('name','=',vals['origin'])])
@@ -253,12 +221,11 @@ class account_invoice(osv.osv):
                     vals['warehouse_id'] = sale_order.warehouse_id and sale_order.warehouse_id.id or False
             
             if res_obj.validation_method:vals['is_add_validate'] = True
-#            vals['shipping_add_id'] = vals['partner_id']
             addr = self.pool.get('res.partner').browse(cr, uid, 'partner_invoice_id' in vals and vals['partner_invoice_id'] or vals['partner_id'], context=context)
             vals['shipping_address'] = str(addr.name+ '\n'+(addr.street or '')+ '\n'+(addr.city and addr.city+', ' or ' ')+(addr.state_id and addr.state_id.name or '')+ ' '+(addr.zip or '')+'\n'+(addr.country_id and addr.country_id.name or ''))
         
         return super(account_invoice, self).create(cr, uid, vals, context=context)
-#    
+    
     def write(self, cr, uid, ids, vals, context=None):
         if 'partner_id' in vals:
             res_obj = self.pool.get('res.partner').browse(cr, uid, vals['partner_id'], context=context)
@@ -282,9 +249,7 @@ class account_invoice(osv.osv):
         if 'tax_add_shipping' in vals: vals['tax_add_shipping'] = vals['tax_add_shipping']
         if 'shipping_address' in vals: vals['shipping_address'] = vals['shipping_address']
         
-        return super(account_invoice, self).write(cr, uid, ids, vals, context=context)
-    
-        
+        return super(account_invoice, self).write(cr, uid, ids, vals, context=context)        
 
     _columns = {
         'invoice_doc_no': fields.char('Source/Ref Invoice No', size=32, readonly=True, states={'draft':[('readonly',False)]}, help="Reference of the invoice"),
@@ -337,78 +302,6 @@ class account_invoice(osv.osv):
         
         }
 
-    
-    '''    
-    def finalize_invoice_move_lines(self, cr, uid, invoice_browse, move_lines):
-        """After validate invoice create finalize invoice move lines with shipping amount
-        and also manage the debit and credit balance """
-        flag = False
-        account = False
-        move_lines = super(account_invoice, self).finalize_invoice_move_lines(cr, uid, invoice_browse, move_lines)
-        if invoice_browse.type == "out_refund":
-            account = invoice_browse.account_id.id
-        else:
-            if invoice_browse.shipping_lines:
-                for ship_line in invoice_browse.shipping_lines:
-                    flag = True
-                    account = ship_line.sale_account_id.id
-#            account = invoice_browse.sale_account_id.id
-        if flag and invoice_browse.shipping_amt:
-            lines1={
-                    'analytic_account_id' :  False,
-                    'tax_code_id' :  False,
-                    'analytic_lines' :  [],
-                    'tax_amount' :  invoice_browse.shipping_amt,
-                    'name' :  'Shipping Charge',
-                    'ref' : '',
-                    'currency_id' :  False,
-                    'credit' :  invoice_browse.shipping_amt,
-                    'product_id' :  False,
-                    'date_maturity' : False,
-                    'debit' : False,
-                    'date' : time.strftime("%Y-%m-%d"),
-                    'amount_currency' : 0,
-                    'product_uom_id' :  False,
-                    'quantity' : 1,
-                    'partner_id' : invoice_browse.partner_id.id,
-                    'account_id' : account,}
-            
-            move_lines.append((0,0,lines1))
-            # Retrieve the existing debit line if one exists
-            has_entry = False
-            for move_line in move_lines:
-                
-                journal_entry = move_line[2]
-#                if journal_entry['account_id'] == invoice_browse.journal_id.default_debit_account_id.id:
-                if journal_entry['account_id'] == invoice_browse.account_id.id:
-#                if journal_entry['account_id'] == account:   
-                   journal_entry['debit'] += invoice_browse.shipping_amt
-                   has_entry = True
-                   break
-            # If debit line does not exist create one. Generally this condition will not happen. Just a fail-safe option    
-            if not has_entry:
-                lines2={
-                        'analytic_account_id' :  False,
-                        'tax_code_id' :  False,
-                        'analytic_lines' :  [],
-                        'tax_amount' :  False,
-                        'name' :  '/',
-                        'ref' : '',
-                        'currency_id' :  False,
-                        'credit' :  False,
-                        'product_id' :  False,
-                        'date_maturity' : False,
-                        'debit' : invoice_browse.shipping_amt,
-                        'date' : time.strftime("%Y-%m-%d"),
-                        'amount_currency' : 0,
-                        'product_uom_id' :  False,
-                        'quantity' : 1,
-                        'partner_id' : invoice_browse.partner_id.id,
-                        'account_id' : invoice_browse.journal_id.default_debit_account_id.id,}
-            
-                move_lines.append((0,0,lines2))
-        return move_lines
-'''
 
     def finalize_invoice_move_lines(self, move_lines):
         
@@ -420,13 +313,11 @@ class account_invoice(osv.osv):
         recs = self.env['account.move.line']
         uid = recs.env.uid
         cr = recs.env.cr
-        
-        
-        
+
         flag = False
         account = False
-        #move_lines = super(account_invoice, self).finalize_invoice_move_lines(cr, uid, invoice_browse, move_lines)
-        move_lines = super(account_invoice, self).finalize_invoice_move_lines(move_lines) #kranbery
+
+        move_lines = super(account_invoice, self).finalize_invoice_move_lines(move_lines)
         if invoice_browse.type == "out_refund":
             account = invoice_browse.account_id.id
         else:
@@ -434,7 +325,7 @@ class account_invoice(osv.osv):
                 for ship_line in invoice_browse.shipping_lines:
                     flag = True
                     account = ship_line.sale_account_id.id
-#            account = invoice_browse.sale_account_id.id
+
         if flag and invoice_browse.shipping_amt:
             lines1={
                     'analytic_account_id' :  False,
@@ -461,9 +352,7 @@ class account_invoice(osv.osv):
             for move_line in move_lines:
                 
                 journal_entry = move_line[2]
-#                if journal_entry['account_id'] == invoice_browse.journal_id.default_debit_account_id.id:
                 if journal_entry['account_id'] == invoice_browse.account_id.id:
-#                if journal_entry['account_id'] == account:   
                    journal_entry['debit'] += invoice_browse.shipping_amt
                    has_entry = True
                    break
@@ -740,7 +629,6 @@ class account_invoice(osv.osv):
             # create the new invoice
             refund_ids.append(self.create(cr, uid, invoice_data, context=context))
             res_obj = partner_obj.browse(cr, uid, invoice.partner_id.id)
-#            if res_obj.validation_method == 'avatax': #comments after changes in functionality with not support country customer
             self.write(cr, uid, refund_ids[0], {
                 'invoice_doc_no': invoice.internal_number,
                 'invoice_date': invoice.date_invoice,
@@ -769,46 +657,7 @@ class account_invoice(osv.osv):
                 account_tax_obj.cancel_tax(cr, uid, avatax_config, invoice.internal_number, doc_type, 'DocVoided')
         self.write(cr, uid, ids, {'number': '', 'internal_number':''})
         return res
-    '''
-    def check_tax_lines(self, cr, uid, inv, compute_taxes, ait_obj):
-        avatax_config_obj = self.pool.get('avalara.salestax')
-        avatax_config = avatax_config_obj._get_avatax_config_company(cr, uid)
-        partner_obj = self.pool.get('res.partner')
-        c_code = partner_obj.browse(cr, uid, inv.partner_id.id).country_id.code or False
-        
-        cs_code = []        #Countries where Avalara address validation is enabled
-        for c_brw in avatax_config.country_ids:
-            cs_code.append(str(c_brw.code))
-        #invoice type check when avalara config working and supplier invoice refund by default functionality
-        if avatax_config and not avatax_config.disable_tax_calculation and inv.type in ['out_invoice', 'out_refund'] and c_code in cs_code:
-            if not inv.tax_line:
-                for tax in compute_taxes.values():
-                    ait_obj.create(cr, uid, tax)
-            else:
-                tax_key = []
-                for tax in inv.tax_line:
-                    if tax.manual:
-                        continue
-                    key = (tax.tax_code_id.id, tax.base_code_id.id, tax.account_id.id)
-                    
-                    tax_key.append(key)
-                    if not key in compute_taxes:
-                        raise osv.except_osv(_('Warning!'), _('Global taxes defined, but they are not in invoice lines !'))
-                    base = compute_taxes[key]['base']
-                    if abs(base - tax.base) > inv.company_id.currency_id.rounding:
-                        raise osv.except_osv(_('Warning!'), _('Tax base different!\nClick on compute to update the tax base.'))
-                for key in compute_taxes:
-                    if not key in tax_key:
-                        raise osv.except_osv(_('Warning!'), _('Taxes are missing!\nClick on compute button.'))
-            
-                for tax in inv.tax_line:
-                    key = (tax.tax_code_id.id, tax.base_code_id.id, tax.account_id.id)
-                    if abs(compute_taxes[key]['amount'] - tax.amount) > inv.company_id.currency_id.rounding:
-                        raise osv.except_osv(_('Warning !'), _('Tax amount different !\nClick on compute to update tax base'))
-        else:
-            super(account_invoice, self).check_tax_lines(cr, uid, inv, compute_taxes, ait_obj)
-        return True
-'''
+
     def check_tax_lines(self, compute_taxes):
         
         # Kranbery - Adapt new environment
@@ -923,13 +772,7 @@ class account_invoice_tax(osv.osv):
         o_tax_amt = 0.0
         s_tax_amt = 0.0
         partner_obj = self.pool.get('res.partner')
-        customer_date_validation = False
-        
-        # Check partner address is valid
-        customer_date_validation = partner_obj.browse(cr, uid, invoice.partner_id.id).date_validation
-        #if not customer_date_validation and not avatax_config.disable_tax_calculation:
-        #    raise osv.except_osv(_('Address Validation Error'), _('Customer does not have validated address or address is missing.  Make sure to Validate the customer\'s address in the AvaTax tab on the customer\'s settings.'))
-        
+
         
         c_code = partner_obj.browse(cr, uid, invoice.partner_id.id).country_id.code or False
         cs_code = []        #Countries where Avalara address validation is enabled
