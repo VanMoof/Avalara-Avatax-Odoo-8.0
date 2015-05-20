@@ -41,6 +41,8 @@ class sale_order(osv.osv):
         if res_obj.validation_method:res['value']['is_add_validate'] = True
         else:res['value']['is_add_validate'] = False
         return res
+
+
                 
     
     def create(self, cr, uid, vals, context=None):
@@ -251,7 +253,7 @@ class sale_order(osv.osv):
     _defaults = {
         'tax_add_shipping': True,
         }
-
+    
     def create_lines(self, cr, uid, order_lines):
         """ Tax line creation for calculating tax amount using avalara tax code. """
         lines = []

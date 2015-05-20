@@ -18,15 +18,31 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+from openerp.osv import fields,osv
+from openerp.tools.translate import _
+import openerp.addons.decimal_precision as dp
 
-import product
-import avalara_salestax
-import partner
-import avalara_api
-import sale_order
-import account_invoice
-import account_tax
-import wizard
-import warning
-#import sale_stock
+class sale_order(osv.osv):
+    _inherit = "sale.order"
+    
+
+    def onchange_warehouse_id(self, cr, uid, ids, warehouse_id, context=None):
+        """Override method to add new fields values.
+        @param part- update vals location code which is the abbreviation of warehouse abbreviation
+        """        
+        res = super(sale_order, self).onchange_warehouse_id(cr, uid, ids, warehouse_id, context=context)        
+        val = res
+        if warehouse_id:
+            warehouse = self.pool.get('stock.warehouse').browse(cr, uid, warehouse_id, context=context)
+            #if warehouse.company_id:
+            #    val['company_id'] = warehouse.company_id.id
+            if warehouse.code:
+                val['location_code'] = warehouse.code
+
+        return {'value': val} 
+    
+    
+sale_order()
+
+
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
