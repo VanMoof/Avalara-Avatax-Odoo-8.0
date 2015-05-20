@@ -512,7 +512,7 @@ class account_invoice(osv.osv):
             cs_code = []        #Countries where Avalara address validation is enabled
             for c_brw in avatax_config.country_ids:
                 cs_code.append(str(c_brw.code))
-            if avatax_config and not avatax_config.disable_tax_calculation and invoice.type in ['out_invoice','out_refund'] and c_code in cs_code:
+            if avatax_config and not avatax_config.disable_tax_calculation and invoice.type in ['out_invoice','out_refund']:  and c_code in cs_code:
                 shipping_add_id = get_address_for_tax(self, cr, uid, [invoice.id], context)
                 shipping_add_origin_id = get_origin_address_for_tax(self, cr, uid, [invoice.id], context)
                 tax_date = get_origin_tax_date(self, cr, uid, [invoice.id], context)                

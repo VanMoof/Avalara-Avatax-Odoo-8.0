@@ -107,7 +107,7 @@ class AvaTaxService:
                     raise osv.except_osv(_('AvaTax: Warning \n AvaTax could not validate the street address.'), _('You can save the address and AvaTax will make an attempt to compute taxes based on the zip code if "Attempt automatic address validation" is enabled in the Avatax connector configuration.  \n\n Also please ensure that the company address is set and Validated.  You can get there by going to Sales->Customers and removing "Customers" filter from the search at the top.  Then go to your company contact info and validate your address in the Avatax Tab'))
 
                 else:
-                    raise osv.except_osv(_('AvaTax: Error: '+str(w_message._Name)+"\n\n"), _(AvaTaxError(result.ResultCode, result.Messages)))
+                    raise osv.except_osv(_('AvaTax: Error: '+str(w_message._Name)+"\n\n"), _("Summary: " + w_message.Summary + "\n Details: " + w_message.Details + "\n Severity: " + w_message.Severity))
             else:
                 return result
             

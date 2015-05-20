@@ -47,7 +47,7 @@
                             </group>
                             </group>
                             <group>
-                              <separator string="Countries" colspan="4"/><label string="(Countries where Avalara address validation is enabled)" colspan="2"/>
+                              <separator string="Countries" colspan="4"/><label string="Countries Authorized to Process (ISO code)" colspan="2"/>
                               <field name="country_ids" colspan="4" nolabel="1"/>
 		                  	</group>
 		                  	<group colspan="4" col="4" string="Tax Calculation">
