@@ -28,5 +28,5 @@ import account_invoice
 import account_tax
 import wizard
 import warning
-#import sale_stock
+import sale_stock
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

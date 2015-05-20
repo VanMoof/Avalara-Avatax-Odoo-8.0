@@ -61,7 +61,7 @@ Note: Make sure you have proper internet connection.
 """,
     "category" : "Generic Modules/Accounting",
     "website" : "http://www.kranbery.com/",
-    "depends" : [ 'base','sale','account','account_accountant','stock'], #'sale_stock','account_accountant','stock' ,'account','sale_stock'
+    "depends" : [ 'base','sale','account','account_accountant','stock','sale_stock'], #'sale_stock','account_accountant','stock' ,'account','sale_stock'
     #"images" : [ 'images/screenshot.png'],
     "init_xml" : [],
     "demo_xml" : [],
