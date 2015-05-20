@@ -138,16 +138,26 @@ class account_invoice(osv.osv):
             date_invoice, payment_term, partner_bank_id, company_id)
         
         res_obj = self.pool.get('res.partner').browse(cr, uid, partner_id)
-        #addr = self.pool.get('res.partner').browse(cr, uid, res['value'] and res['value']['partner_shipping_id'] or partner_id)        
+        addr = self.pool.get('res.partner').browse(cr, uid, res['value'] and partner_id)        
         res['value']['exemption_code'] = res_obj.exemption_number or ''
         res['value']['exemption_code_id'] = res_obj.exemption_code_id.id or None
         #res['value']['tax_add_shipping'] = True
-        #res['value']['tax_address'] = str((addr.name  or '')+ '\n'+(addr.street or '')+ '\n'+(addr.city and addr.city+', ' or ' ')+(addr.state_id and addr.state_id.name or '')+ ' '+(addr.zip or '')+'\n'+(addr.country_id and addr.country_id.name or ''))        
+        res['value']['shipping_address'] = str((addr.name  or '')+ '\n'+(addr.street or '')+ '\n'+(addr.city and addr.city+', ' or ' ')+(addr.state_id and addr.state_id.name or '')+ ' '+(addr.zip or '')+'\n'+(addr.country_id and addr.country_id.name or ''))        
         if res_obj.validation_method:res['value']['is_add_validate'] = True
         else:res['value']['is_add_validate'] = False
         return res
             
-    
+    def onchange_warehouse_id(self, cr, uid, ids, warehouse_id, context=None):
+     
+        val={}      
+        if warehouse_id:
+            warehouse = self.pool.get('stock.warehouse').browse(cr, uid, warehouse_id, context=context)
+            if warehouse.company_id:
+                val['company_id'] = warehouse.company_id.id
+            if warehouse.code:
+                val['location_code'] = warehouse.code
+
+        return {'value': val}     
     
     def _amount_all(self, cr, uid, ids, name, args, context=None):
         res = {}
