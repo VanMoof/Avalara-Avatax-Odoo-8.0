@@ -51,8 +51,8 @@
                               <field name="country_ids" colspan="4" nolabel="1"/>
 		                  	</group>
 		                  	<group colspan="4" col="4" string="Tax Calculation">
-		                    	<field name="disable_tax_calculation" on_change="onchange_disable_tax_calculation(disable_tax_reporting)"/>
-		                    	<field name="disable_tax_reporting" on_change="onchange_tax_reporting(disable_tax_calculation)"/>		                    	
+		                    	<field name="disable_tax_calculation" on_change="onchange_disable_tax_calculation(disable_tax_calculation)"/>
+		                    	<field name="disable_tax_reporting" on_change="onchange_tax_reporting(disable_tax_reporting)"/>		                    	
 		                     </group>
 		                 </page>
 		                 <page string="About AvaTax">

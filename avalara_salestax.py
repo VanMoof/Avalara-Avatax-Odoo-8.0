@@ -111,39 +111,45 @@ class avalara_salestax(osv.osv):
             
         return {'value': res}
 
-    # treat as radio button 
-    def onchange_disable_tax_calculation(self, cr, uid, dtr_id, context=None):
+    # treat as radio button(s) 
+    def onchange_disable_tax_calculation(self, cr, uid, ids, dtc, context=None):
         res = {}
-        if dtr_id:
+        if dtc:
             res['disable_tax_reporting'] = False
+            res['disable_tax_calculation'] = dtc
         return {'value': res}
-    # treat as radio button         
-    def onchange_tax_reporting(self, cr, uid, dtc_id, context=None):
+       
+    def onchange_tax_reporting(self, cr, uid, ids, dtr, context=None):
         res = {}
-        if dtc_id:
+        if dtr:
+            res['disable_tax_reporting'] = True
             res['disable_tax_calculation'] = False
         return {'value': res}
     
     def onchange_system_call1(self, cr, uid, ids, on_order, context=None):
-        group_obj = self.pool.get('res.groups')
-        dataobj = self.pool.get('ir.model.data')
+        res = {}
+        #group_obj = self.pool.get('res.groups')
+        #dataobj = self.pool.get('ir.model.data')
         if on_order:
-            group_id = dataobj.get_object_reference(cr, uid, 'avalara_salestax', 'group_avatax_view')
-            group_obj.write(cr, uid, [group_id[1]], {'users': [(6,0,[])]})
-            return {'value': {'on_order' : on_order,'on_line' : False}}
-        else:
-            return {}
+            #group_id = dataobj.get_object_reference(cr, uid, 'avalara_salestax', 'group_avatax_view')
+            #group_obj.write(cr, uid, [group_id[1]], {'users': [(6,0,[])]})
+            res['on_order'] = True
+            res['on_line'] = False            
+        return {'value': res}
+
         
     def onchange_system_call2(self, cr, uid, ids, on_line, context=None):
-        group_obj = self.pool.get('res.groups')
-        dataobj = self.pool.get('ir.model.data')
-        user_ids = self.pool.get('res.users').search(cr, uid, [])
+        res = {}
+        #group_obj = self.pool.get('res.groups')
+        #dataobj = self.pool.get('ir.model.data')
+        #user_ids = self.pool.get('res.users').search(cr, uid, [])
         if on_line:
-            group_id = dataobj.get_object_reference(cr, uid, 'avalara_salestax', 'group_avatax_view')
-            group_obj.write(cr, uid, [group_id[1]], {'users': [(6,0,user_ids)]})
-            return {'value': {'on_order' : False,'on_line' : on_line}}
-        else:
-            return {}
+            #group_id = dataobj.get_object_reference(cr, uid, 'avalara_salestax', 'group_avatax_view')
+            #group_obj.write(cr, uid, [group_id[1]], {'users': [(6,0,user_ids)]})
+            res['on_order'] = False
+            res['on_line'] = True            
+        return {'value': res}                    
+
 
     
    
