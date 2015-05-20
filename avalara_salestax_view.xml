@@ -3,7 +3,7 @@
     <data>
 
         <!--
-        AvaTax API Configuration in OpenERP
+        AvaTax API Configuration in Odoo
         -->
 
         <record id="view_avalara_salestax_form" model="ir.ui.view">
