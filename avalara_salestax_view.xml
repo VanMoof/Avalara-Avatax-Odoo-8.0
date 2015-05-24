@@ -40,7 +40,7 @@
                               <field name="result_in_uppercase" /> <!--  attrs="{'readonly': [('address_validation','!=', False)]}"  -->
                               <field name="auto_generate_customer_code" />
                             </group>
-                            <group colspan="2" col="2" expand="1" string="Avalara Submissions & Transactions">
+                            <group colspan="2" col="2" expand="1" string="Avalara Submissions / Transactions">
                                 <field name="on_order" on_change="onchange_system_call1(on_order)"/>
                                 <field name="on_line" on_change="onchange_system_call2(on_line)"/>
                                 <field name="upc_enable" />
