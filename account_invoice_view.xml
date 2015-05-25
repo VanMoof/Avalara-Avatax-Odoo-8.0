@@ -12,7 +12,7 @@
                 
                 <field name='type' position="after">
                     <div class="oe_right oe_button_box">
-                        <button name="button_dummy" states="draft" string="Compute" type="object" icon="gtk-execute" class="oe_highlight"/>
+                        <button name="button_dummy" states="draft" string="Compute Tax" type="object" icon="gtk-execute" class="oe_highlight" help="Taxes are computed when the invoice is validated however you may use this to pre-calculate the tax amount."/>
                     </div>
                 </field>
                 <field name="payment_term" position="after">
