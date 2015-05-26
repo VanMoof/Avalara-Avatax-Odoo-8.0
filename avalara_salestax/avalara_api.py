@@ -4,10 +4,11 @@ import urllib2
 import string
 import os
 import datetime
-import base64
+#import base64
 
-from tools.translate import _
-from osv import osv
+from openerp.tools.translate import _
+#from osv import osv
+from openerp.osv import osv
 
 class AvaTaxService:
 
@@ -102,9 +103,12 @@ class AvaTaxService:
             if (result.ResultCode != 'Success'):
                 #for w_message in result.Messages.Message:
                 w_message = result.Messages.Message[0]
-                if (w_message._Name == 'AddressRangeError' or  w_message._Name == 'AddressUnknownStreetError' or w_message._Name == 'AddressNotGeocodedError' or w_message._Name == 'NonDeliverableAddressError' ):
-                    raise osv.except_osv(_('AvaTax: Warning \n AvaTax could not validate the street address.'), _('You can save the address and AvaTax will make an attempt to compute taxes based on the zip code if "Attempt automatic address validation" is enabled in the Avatax connector configuration.'))
-                raise osv.except_osv(_('AvaTax: Error\n'+"Information reported from Avatax Service, please check your information and/or settings in the ERP.\n\n"), _(AvaTaxError(result.ResultCode, result.Messages)))
+                if (w_message._Name == 'TaxAddressError' or w_message._Name == 'AddressRangeError' or  w_message._Name == 'AddressUnknownStreetError' or w_message._Name == 'AddressNotGeocodedError' or w_message._Name == 'NonDeliverableAddressError' ):
+                    raise osv.except_osv(_('AvaTax: Warning \n AvaTax could not validate the street address.'), _('You can save the address and AvaTax will make an attempt to compute taxes based on the zip code if "Attempt automatic address validation" is enabled in the Avatax connector configuration.  \n\n Also please ensure that the company address is set and Validated.  You can get there by going to Sales->Customers and removing "Customers" filter from the search at the top.  Then go to your company contact info and validate your address in the Avatax Tab'))
+                elif (w_message._Name == 'UnsupportedCountryError' ):
+                    raise osv.except_osv(_("AvaTax: Notice\n\n"), _("Please ensure that you are validating an address in the US and Canada only.  If the address it outside of those countries, Avalara will still calculate global tax rules but will not validate those addresses."))
+                else:
+                    raise osv.except_osv(_('AvaTax: Error: '+str(w_message._Name)+"\n\n"), _("Summary: " + w_message.Summary + "\n Details: " + w_message.Details + "\n Severity: " + w_message.Severity))
             else:
                 return result
             
@@ -228,15 +232,17 @@ class AvaTaxError(Error):
     def __init__(self, resultCode, messages):
         self.resultCode = resultCode
         self.messages = messages
+        self.__str__
+        
 
     def __str__(self):
-        str = ''
+        output_str = ''
         for item in self.messages:
             message = item[1][0] # SUDS gives us the message in a list, in a tuple
 
-            str = "Severity: %s\n\nDetails: %s\n\n RefersTo: %s\n\n Summary: %s" \
+            output_str = "Severity: %s\n\nDetails: %s\n\n RefersTo: %s\n\n Summary: %s" \
             % (message.Severity, message.Details, message.RefersTo, message.Summary)
-        return str
+        return output_str
 
 class BaseAddress:
 

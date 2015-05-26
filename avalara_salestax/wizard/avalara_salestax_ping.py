@@ -20,8 +20,8 @@
 ##############################################################################
 
 from openerp.osv import fields,osv
-#from tools.translate import _
-from addons.avalara_salestax.avalara_api import AvaTaxService
+from openerp.tools.translate import _
+from openerp.addons.avalara_salestax.avalara_api import AvaTaxService
 #from avalara_salestax.avalara_api import AvaTaxService
 #from ../avalara_api import AvaTaxService
 '''

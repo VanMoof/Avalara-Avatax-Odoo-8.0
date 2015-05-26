@@ -75,27 +75,6 @@
 		          </page>
 		        </xpath>
                 
-<!--                 
-
-              <xpath expr="//page[@string='Accounting']" position="inside">
-                <group col="2" colspan="2" string="AvaTax Properties">
-			            <field name="tax_apply"/>
-	                   	<newline/>
-			            <field name="tax_code_id" attrs="{'invisible': [('tax_apply','=',False)],'required': [('tax_apply','=',True)]}" /> 
-                </group>
-              </xpath> 
-              
-		        <xpath expr="/form/sheet/notebook/page[@string='Accounting']" position="after">
-		          <page string="AvaTax">
-		              <separator string="AvaTax Properties" colspan="4"/>
-			          <group colspan="2" col="2">
-			            <field name="tax_apply"/>
-	                   	<newline/>
-			            <field name="tax_code_id" attrs="{'invisible': [('tax_apply','=',False)],'required': [('tax_apply','=',True)]}" /> 
-			          </group>
-		          </page>
-		        </xpath>
--->		        
 		        
 		        <field name="description" position="replace">
 		            <group colspan="2" col="2" string="Product Description" >

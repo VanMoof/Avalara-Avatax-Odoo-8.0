@@ -3,7 +3,7 @@
     <data>
 
         <!--
-        AvaTax API Configuration in OpenERP
+        AvaTax API Configuration in Odoo
         -->
 
         <record id="view_avalara_salestax_form" model="ir.ui.view">
@@ -36,20 +36,23 @@
 		                  	<group colspan="2" col="2" expand="1" string="Address Validation">
                               <field name="address_validation" on_change="onchange_address_validation(address_validation)"/>
                               <field name="validation_on_save" /> <!--  attrs="{'readonly': [('address_validation','!=', False)]}" -->
-                              <field name="force_address_validation" /> <!--  attrs="{'readonly': [('address_validation','!=', False)]}" -->
+                              <!-- field name="force_address_validation" /> --><!--  attrs="{'readonly': [('address_validation','!=', False)]}" -->
                               <field name="result_in_uppercase" /> <!--  attrs="{'readonly': [('address_validation','!=', False)]}"  -->
+                              <field name="auto_generate_customer_code" />
                             </group>
-                            <group colspan="2" col="2" expand="1" string="System Calls">
+                            <group colspan="2" col="2" expand="1" string="Avalara Submissions / Transactions">
                                 <field name="on_order" on_change="onchange_system_call1(on_order)"/>
                                 <field name="on_line" on_change="onchange_system_call2(on_line)"/>
+                                <field name="upc_enable" />
                             </group>
                             </group>
                             <group>
-                              <separator string="Countries" colspan="4"/><label string="(Countries where Avalara address validation is enabled)" colspan="2"/>
+                              <separator string="Countries" colspan="4"/><label string="Countries Authorized to Process (ISO code)" colspan="2"/>
                               <field name="country_ids" colspan="4" nolabel="1"/>
 		                  	</group>
-		                  	<group colspan="4" col="4" string="Tax Calculation">
-		                    	<field name="disable_tax_calculation"/>
+		                  	<group colspan="4" col="4" string="Disable">
+		                    	<field name="disable_tax_calculation" on_change="onchange_disable_tax_calculation(disable_tax_calculation)"/>
+		                    	<field name="disable_tax_reporting" on_change="onchange_tax_reporting(disable_tax_reporting)"/>		                    	
 		                     </group>
 		                 </page>
 		                 <page string="About AvaTax">

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 OpenERP SA (<http://www.openerp.com>)
+#    Odoo, Open Source Management Solution
+#    Copyright (C) 2004-2010 Odoo SA (<http://www.openerp.com>)
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -20,52 +20,43 @@
 ##############################################################################
 
 {
-    "name" : "OpenERP Avalara connector for sales tax calculation",
+    "name" : "Avalara Avatax connector for sales tax calculation",
     "version" : "8.1.0",
     "author" : 'Kranbery Technologies',
-    'summary': 'Quotations, Sales Orders, Invoicing',
+    'summary': 'Sales tax is hard. We make it easy.',
     "description": """ 
-This module helps to calculate sale tax from Avalara while creating Sale Orders or Customer Invoices. 
-Sale tax calculated is based on customer address which needs to be get validated from Avalara before 
-calculating sale tax for particular customer order or invoice.
+    
+The Avatax module automates the complex task of sales tax calculation with ease.  Sale tax calculations are based on prevalidated shop, warehouse and customer address.  This app plugs into your current installation of odoo with minimal configuration and just works.  Your sales orders, invoices and refunds activity is automatically calculated from Avalara's calc service returning the proper sales tax and places the tax into the order/invoice seamlessly.  
  
 This module has Following Features:
 
-1. Customer and Company Address Validation.
-2. In Line or Total Order amount sale tax calculation. 
-3. Handling of Customer Refunds.
-4. Customer Exemption handling. 
-5. Calculation of Shipping Cost tax. 
-6. Use both Avalara and OpenERP Taxes etc.
-                     
-Some important points. 
-
-1. Prior Using this module make sure you have Avalara admin console login for configuring your avalara settings https://www.avalara.com.
-
-2. Once module is installed configure your Avalara setting in OpenERP under "Accounting/Configuration/AvaTax".
-
-3. Default Tax will be created make sure you configure it correctly under "Accounting/Configuration/Tax"
-
-4. Configure Company Address and Validate it from Avalara. (Use customer link for finding res.partner for company and validate it from partner record use Sales/Sales/Customers and remove Customer filter on this tree view) 
-
-5. Make sure you validate customer address.
-
-Improvement for version 8.1.0
-
-Refactored for Odoo (OpenERP 8)
+1. Customer and Company Address Validation
+2. Line or Total Order amount sale tax calculation 
+3. Handling of Customer Refunds
+4. Customer Exemption handling
+5. Calculation of Shipping Cost tax
+6. Use both Avalara and Odoo Taxes etc
+7. International support
+8. Discount management
+9. Reporting record through an avalara management console to verify transactions
+10. Documentation included
 
 
+Download module and call Avalara toll free at 877-780-4848 to get started!
 
-     
-Note: Make sure you have proper internet connection.
+http://kranbery.com/avatax-openerp-module/
+
+http://www.avalara.com/
+
+
+Note: We always recommend testing the module before deploying to a production environment
+
+
 """,
     "category" : "Generic Modules/Accounting",
-    "website" : "http://www.kranbery.com/",
-    "depends" : [ 'base','sale','account','account_accountant', 'stock'],
-    #"images" : [ 'images/screenshot.png'],
-    "init_xml" : [],
-    "demo_xml" : [],
-    "update_xml" : [
+    "website" : "http://kranbery.com/avatax-openerp-module/",
+    "depends" : [ 'base','sale','account','account_accountant','stock','sale_stock'],
+    "data" : [
     "wizard/avalara_salestax_ping_view.xml",
     "wizard/avalara_salestax_address_validate_view.xml",
     "avalara_salestax_view.xml",
@@ -79,10 +70,21 @@ Note: Make sure you have proper internet connection.
     "security/avalara_salestax_security.xml",
     "security/ir.model.access.csv",
     ],
+    "images" : [
+        "images/main_screenshot.png",   
+        "images/kranbery_logo.png",     
+                
+    ],
+    'demo': [
+        'demo.xml',
+    ],    
     "test" : [],
     'installable': True,
     'auto_install': False,
     'application': True,
+   
+
+    
 }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

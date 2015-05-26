@@ -19,8 +19,7 @@
 #
 ##############################################################################
 from openerp.osv import fields,osv
-from tools.translate import _
-from openerp.addons.decimal_precision import decimal_precision as dp
+
 
 class tax_schedule(osv.osv):
     _name = "tax.schedule"
@@ -108,28 +107,39 @@ class avalara_salestax(osv.osv):
             res['validation_on_save'] = False
             res['force_address_validation'] = False
             res['result_in_uppercase'] = False
+            
+        return {'value': res}
+
+    # treat as radio button(s) 
+    def onchange_disable_tax_calculation(self, cr, uid, ids, dtc, context=None):
+        res = {}
+        if dtc:
+            res['disable_tax_reporting'] = False
+            res['disable_tax_calculation'] = dtc
+        return {'value': res}
+       
+    def onchange_tax_reporting(self, cr, uid, ids, dtr, context=None):
+        res = {}
+        if dtr:
+            res['disable_tax_reporting'] = True
+            res['disable_tax_calculation'] = False
         return {'value': res}
     
     def onchange_system_call1(self, cr, uid, ids, on_order, context=None):
-        group_obj = self.pool.get('res.groups')
-        dataobj = self.pool.get('ir.model.data')
+        res = {}
         if on_order:
-            group_id = dataobj.get_object_reference(cr, uid, 'avalara_salestax', 'group_avatax_view')
-            group_obj.write(cr, uid, [group_id[1]], {'users': [(6,0,[])]})
-            return {'value': {'on_order' : on_order,'on_line' : False}}
-        else:
-            return {}
+            res['on_order'] = on_order
+            res['on_line'] = False            
+        return {'value': res}
+
         
     def onchange_system_call2(self, cr, uid, ids, on_line, context=None):
-        group_obj = self.pool.get('res.groups')
-        dataobj = self.pool.get('ir.model.data')
-        user_ids = self.pool.get('res.users').search(cr, uid, [])
+        res = {}
         if on_line:
-            group_id = dataobj.get_object_reference(cr, uid, 'avalara_salestax', 'group_avatax_view')
-            group_obj.write(cr, uid, [group_id[1]], {'users': [(6,0,user_ids)]})
-            return {'value': {'on_order' : False,'on_line' : on_line}}
-        else:
-            return {}
+            res['on_order'] = False
+            res['on_line'] = on_line            
+        return {'value': res}                    
+
 
     
    
@@ -144,18 +154,19 @@ class avalara_salestax(osv.osv):
         'address_validation': fields.boolean('Attempt automatic address validation', help="Check to disable address validation"),
         'enable_address_validation': fields.boolean('Enable Address Validation', help="Check to Enable address validation"),
         'result_in_uppercase': fields.boolean('Return validation results in upper case', help="Check is address validation results desired to be in upper case"),
-        'validation_on_save': fields.boolean('Validate on save for customer profile', help="Check if each address when saved should be validated"),
-        'force_address_validation': fields.boolean('Force Address validation on customer profile save', help="Check if address validation should be done before tax calculation"),
-        'disable_tax_calculation': fields.boolean('Disable Tax Calculation', help="Check to disable tax calculation"),
+        'validation_on_save': fields.boolean('Force validate on save for customer profile', help="Validates the address and automatically saves when Customer profile is saved."),
+        #'force_address_validation': fields.boolean('Force Address validation on customer profile save', help="Check if address validation should be done before tax calculation"),
+        'auto_generate_customer_code': fields.boolean('Automatically generate customer code', help="This will generate customer code for customers in the system who do not have codes already created.  Each code is unique per customer.  When this is disabled, you will have to manually go to each customer and manually generate their customer code.  This is required for Avatax and is only generated one time."),                
+        'disable_tax_calculation': fields.boolean('Disable Avalara Tax Calculation and reporting', help="Check to disable avalara tax calculation and reporting"),
+        'disable_tax_reporting': fields.boolean('Disable Avalara Tax reporting only', help="Check to disable avalara tax reporting to Avatax Service.  You will not see the transactions on the Avalara transaction web portal."),
         'default_tax_schedule_id': fields.many2one('tax.schedule', 'Default Tax Schedule', help="Identifies customers using AVATAX. Only customers with AVATAX designation triggers tax calculation from AvaTax otherwise it will follow the normal tax calculation that OpenERP provides"),
         'default_shipping_code_id': fields.many2one('product.tax.code', 'Default Shipping Code', help="The default shipping code which will be passed to Avalara"),
         'country_ids': fields.many2many('res.country', 'avalara_salestax_country_rel', 'avalara_salestax_id', 'country_id', 'Countries', help="Countries where address validation will be used"),
         'active': fields.boolean('Active', help="Uncheck the active field to hide the record"),
         'company_id': fields.many2one('res.company', 'Company', required=True, help="Company which has subscribed to the AvaTax service"),
-#        'business_id': fields.integer('Business ID', help="The Business TIN or Taxpayer ID is a unique nine digit identifier assigned to U.S. companies for tax reporting purposes."),
-#        'vat_id': fields.integer('VAT ID', help="The Business Identification Number assigned to a non-U.S. company. This is normally the BIN or VAT number."),
         'on_line': fields.boolean('Line-level', help="It will calculate tax line by line and also show."),
         'on_order': fields.boolean('Order-level', help="It will calculate tax for order not line by line."),
+        'upc_enable': fields.boolean('Enable UPC Taxability', help="Allows ean13 to be reported in place of Item Reference as upc identifier."),
         
     }
     _defaults = {
@@ -165,6 +176,9 @@ class avalara_salestax(osv.osv):
         'country_ids': _get_avatax_supported_countries,
         'on_order': True,
         'address_validation': True,
+        'auto_generate_customer_code': True,    
+        'disable_tax_calculation' : False,    
+        'disable_tax_calculation' : False, 
     }
     
     #constraints on uniq records creation with account_number and company_id

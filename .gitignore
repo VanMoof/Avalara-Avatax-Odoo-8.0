@@ -46,3 +46,16 @@ Thumbs.db
 .sass-cache/
 .codekit-config.json
 config.codekit
+<<<<<<< HEAD
+=======
+Iconr
+
+# Eclipse #
+######################
+.project
+.pydevproject
+
+# Python #
+######################
+*.pyc
+>>>>>>> 0036467edf1c735475590a949bc6d6e5abd4b30e
