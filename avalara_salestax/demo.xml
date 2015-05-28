@@ -21,7 +21,7 @@
 			<field eval="0" name="enable_address_validation"/>
 			<field eval="0" name="on_line"/>
 			<field eval="1" name="active"/>
-			<field name="license_key"></field>
+			<field name="license_key">xxx</field>
 			<field eval="0" name="validation_on_save"/>
 			<field eval="0" name="logging"/>
 			<field eval="1" name="on_order"/>
