@@ -636,12 +636,18 @@ class account_invoice(osv.osv):
                 })    
         return refund_ids
 
-    def action_cancel(self, cr, uid, ids, *args):
+    def action_cancel(self, cr, uid, ids, *args, **kwargs):
+        """ The original version of this module reset the invoice number
+        and internal_number, allowing previously confirmed invoices to be
+        deleted and creating gaps in invoice numbering when reconfirming
+        invoices. It is likely that it did this because AvaTax does not allow
+        numbers of previously voided transactions to be reused so expect an
+        error when confirming a previously cancelled invoice. """
         account_tax_obj = self.pool.get('account.tax')
         avatax_config_obj = self.pool.get('avalara.salestax')
         avatax_config = avatax_config_obj._get_avatax_config_company(cr, uid)
         partner_obj = self.pool.get('res.partner')
-        res = super(account_invoice, self).action_cancel(cr, uid, ids, *args)
+        res = super(account_invoice, self).action_cancel(cr, uid, ids, *args, **kwargs)
 
         for invoice in self.browse(cr, uid, ids, *args):
             c_code = partner_obj.browse(cr, uid, invoice.partner_id.id).country_id.code or False
@@ -651,7 +657,6 @@ class account_invoice(osv.osv):
             if avatax_config and not avatax_config.disable_tax_calculation and invoice.type in ['out_invoice','out_refund'] and c_code in cs_code:
                 doc_type = invoice.type == 'out_invoice' and 'SalesInvoice' or 'ReturnInvoice'
                 account_tax_obj.cancel_tax(cr, uid, avatax_config, invoice.internal_number, doc_type, 'DocVoided')
-        self.write(cr, uid, ids, {'number': '', 'internal_number':''})
         return res
 
     def check_tax_lines(self, compute_taxes):
