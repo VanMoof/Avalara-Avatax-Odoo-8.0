@@ -290,15 +290,11 @@ class account_invoice(osv.osv):
         'shipping_address': fields.text('Tax Address'),
         'location_code': fields.char('Location code', size=128, readonly=True, states={'draft':[('readonly',False)]}),  
         'warehouse_id': fields.many2one('stock.warehouse', 'Warehouse'),
-        'partner_invoice_id': fields.many2one('res.partner', 'Invoice Address', readonly=True, required=True, states={'draft': [('readonly', False)]}, help="Invoice address for current sales order."),
-        'partner_shipping_id': fields.many2one('res.partner', 'Delivery Address', readonly=True, required=True, states={'draft': [('readonly', False)]}, help="Delivery address for current sales order."),
                 
     }
     
     _defaults = {
         'tax_add_invoice': True,
-        'partner_invoice_id': lambda self, cr, uid, context: context.get('partner_id', False) and self.pool.get('res.partner').address_get(cr, uid, [context['partner_id']], ['invoice'])['invoice'],
-        'partner_shipping_id': lambda self, cr, uid, context: context.get('partner_id', False) and self.pool.get('res.partner').address_get(cr, uid, [context['partner_id']], ['delivery'])['delivery'],        
         
         }
 
