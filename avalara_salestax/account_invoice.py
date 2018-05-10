@@ -377,8 +377,9 @@ class account_invoice(osv.osv):
         return move_lines    
     
     
-    def confirm_paid(self, cr, uid, ids, context=None):
+    def invoice_validate(self, cr, uid, ids, context=None):
         """After validation invoice will pay by payment register and also committed the avalara invoice record"""
+        res = super(account_invoice, self).invoice_validate(cr, uid, ids, context=context)
         if context is None:
             context = {}
         avatax_config_obj = self.pool.get('avalara.salestax')
@@ -390,7 +391,7 @@ class account_invoice(osv.osv):
         
         # Bypass reporting
         if avatax_config and avatax_config.disable_tax_reporting:
-            return True        
+            return res
         
         for invoice in self.browse(cr, uid, ids, context=context):
             c_code = partner_obj.browse(cr, uid, invoice.partner_id.id).country_id.code or False
@@ -416,8 +417,7 @@ class account_invoice(osv.osv):
                                                    True, tax_date,
                                                    invoice.invoice_doc_no, invoice.location_code or '', context=context)
             
-        self.write(cr, uid, ids, {'state':'paid'}, context=context)
-        return True
+        return res
     
     
     def compute_tax(self, cr, uid, ids, context=None):
