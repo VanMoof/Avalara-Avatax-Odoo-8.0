@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<openerp><data>
+
+    <record id="invoice_form_inherit_1" model="ir.ui.view">
+        <field name="model">account.invoice</field>
+        <field name="inherit_id" ref="account.invoice_form"/>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+
+            <field name="payment_term" position="after">
+                <field name="invoice_doc_no" attrs="{'invisible': [('type','!=','out_refund')]}"/>
+            </field>
+            <xpath expr="//field[@name='invoice_line']/tree/field[@name='price_unit']" position="before">
+                <field name="tax_amt" readonly="1" groups="avalara_salestax.group_avatax_view"/>
+            </xpath>
+
+            <field name="invoice_line" position="after">
+                <h3 groups="avalara_salestax.group_avatax_view"><label style="color: #7c7bad;" for="shipping_lines"/></h3>
+                <field name="shipping_lines" groups="avalara_salestax.group_avatax_view">
+                    <tree string="Shipping Order Lines" editable="bottom">
+                        <field name="ship_method_id" on_change="onchange_select(ship_method_id)"/>
+                        <field name="ship_code_id"/>
+                        <field name="tax_amt" readonly="1"/>
+                        <field name="shipping_cost"/>
+                        <field name="sale_account_id" invisible="1"/>
+                    </tree>
+                </field>
+            </field>
+
+            <field name="amount_untaxed" position="after">
+                <field name="shipping_amt" groups="avalara_salestax.group_avatax_view"/>
+            </field>
+
+            <xpath expr="/form/sheet/group/group/field[@name='account_id']" position="after">
+                <field name="exemption_code" readonly="1" groups="avalara_salestax.group_avatax_view"/>
+                <field name="exemption_code_id" readonly="1" groups="avalara_salestax.group_avatax_view"/>
+                <field name="warehouse_id" options="{'no_create': True}" groups="stock.group_locations"/>
+                <field name="location_code" groups="avalara_salestax.group_avatax_view"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="inherit_view_invoice_line_form" model="ir.ui.view">
+        <field name="name">account.invoice.line.form.inherit</field>
+        <field name="model">account.invoice.line</field>
+        <field name="inherit_id" ref="account.view_invoice_line_form"/>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <field name="price_unit" position="before">
+                <field name="tax_amt" groups="avalara_salestax.group_avatax_view"/>
+            </field>
+        </field>
+    </record>
+
+</data></openerp>

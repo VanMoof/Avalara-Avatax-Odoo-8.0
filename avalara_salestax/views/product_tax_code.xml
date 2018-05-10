@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp><data>
+
+    <record id="view_product_tax_code_tree" model="ir.ui.view">
+        <field name="name">product.tax.code.tree</field>
+        <field name="model">product.tax.code</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+            <tree string="Product Tax Code" editable="top">
+                <field name="name"/>
+                <field name="description"/>
+                <field name="type"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="action_product_tax_code" model="ir.actions.act_window">
+        <field name="name">Product Tax Codes</field>
+        <field name="res_model">product.tax.code</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree</field>
+    </record>
+
+    <menuitem action="action_product_tax_code" id="menu_product_tax_code"
+              name="Product Tax Codes" parent="menu_avatax" sequence="29"/>
+
+</data></openerp>

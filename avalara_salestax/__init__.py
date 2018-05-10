@@ -19,15 +19,6 @@
 #
 ##############################################################################
 
-import product
-import avalara_salestax
-import partner
-import avalara_api
-import sale_order
-import account_invoice
-import account_tax
-import wizard
-import warning
-import sale_stock
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+from . import models
+from . import avalara_api
+from . import wizard

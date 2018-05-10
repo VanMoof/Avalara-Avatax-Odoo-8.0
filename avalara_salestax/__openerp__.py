@@ -1,28 +1,11 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    Odoo, Open Source Management Solution
-#    Copyright (C) 2004-2010 Odoo SA (<http://www.openerp.com>)
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
-
+# © 2015 Kranbery Technologies
+# © 2018 Opener B.V.
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 {
     "name" : "Avalara Avatax connector for sales tax calculation",
-    "version" : "8.1.0",
-    "author" : 'Kranbery Technologies',
+    "version" : '8.0.1.1.0',
+    "author" : 'Kranbery Technologies, Opener B.V.',
     'summary': 'Sales tax is hard. We make it easy.',
     "description": """ 
     
@@ -55,36 +38,33 @@ Note: We always recommend testing the module before deploying to a production en
 """,
     "category" : "Generic Modules/Accounting",
     "website" : "http://kranbery.com/avatax-openerp-module/",
-    "depends" : [ 'base','sale','account','account_accountant','stock','sale_stock'],
+    "depends" : [
+        'sale_stock',
+    ],
     "data" : [
-    "wizard/avalara_salestax_ping_view.xml",
-    "wizard/avalara_salestax_address_validate_view.xml",
-    "avalara_salestax_view.xml",
-    "avalara_salestax_data.xml",
-    "partner_view.xml",
-    "product_view.xml",
-    "account_invoice_workflow.xml",
-    "account_invoice_view.xml",
-    "sale_order_view.xml",
-    "warning_view.xml",
-    "security/avalara_salestax_security.xml",
-    "security/ir.model.access.csv",
+        'data/avalara_salestax_data.xml',
+        'security/res_groups.xml',
+        'views/menu.xml',  # must come first
+        'views/account_invoice.xml',
+        'views/avalara_salestax.xml',
+        'views/avalara_salestax_address_validate.xml',
+        'views/exemption_code.xml',
+        'views/shipping_rate_config.xml',
+        'views/product_category.xml',
+        'views/product_tax_code.xml',
+        'views/product_template.xml',
+        'views/res_partner.xml',
+        "wizard/avalara_salestax_ping_view.xml",
+        "sale_order_view.xml",
+        "security/avalara_salestax_security.xml",
+        "security/ir.model.access.csv",
     ],
     "images" : [
         "images/main_screenshot.png",   
         "images/kranbery_logo.png",     
-                
     ],
     'demo': [
         'demo.xml',
     ],    
-    "test" : [],
     'installable': True,
-    'auto_install': False,
-    'application': True,
-   
-
-    
 }
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp><data>
+
+    <record id="exemption_code_form_view" model="ir.ui.view">
+        <field name="name">exemption.code.form.view</field>
+        <field name="model">exemption.code</field>
+        <field name="type">tree</field>
+        <field name="arch" type="xml">
+	    <tree string="Exemption Code">
+	        <field name="name"/>
+	        <field name="code"/>
+	    </tree>
+	</field>
+    </record>
+
+    <record id="action_exemption_code_details" model="ir.actions.act_window">
+        <field name="name">Exemption Code</field>
+        <field name="res_model">exemption.code</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem action="action_exemption_code_details"
+              id="menu_action_exemption_code_details"
+              name="Exemption Code"
+              parent="menu_avatax"
+              sequence="25"/>
+
+</data></openerp>

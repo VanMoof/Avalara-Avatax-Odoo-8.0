@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp><data>
+    <record id="product_category_form_view" model="ir.ui.view">
+        <field name="model">product.category</field>
+        <field name="type">form</field>
+        <field name="inherit_id" ref="product.product_category_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="/form/sheet" position="inside">
+                <group col="2" colspan="2" string="AvaTax Properties">
+                    <field name="tax_code_id"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</data></openerp>
