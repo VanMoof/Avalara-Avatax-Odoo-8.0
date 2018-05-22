@@ -30,6 +30,8 @@ class AccountInvoiceTax(models.Model):
                 'manual': False,
                 'sequence': tax.sequence,
                 'base': invoice.amount_untaxed,
+                'base_sign': tax.base_sign,
+                'ref_base_sign': tax.ref_base_sign,
             }
             # TODO: while we have the correct tax_amount for taxes per line,
             # if the revenue account of the invoice line is used all tax
@@ -50,7 +52,6 @@ class AccountInvoiceTax(models.Model):
                                    invoice.invoice_line[0].account_id.id),
                     'account_analytic_id': (
                         tax.account_analytic_collected_id.id),
-                    'base_sign': tax.base_sign,
                 })
             else:
                 val.update({
@@ -66,7 +67,6 @@ class AccountInvoiceTax(models.Model):
                                    invoice.invoice_line[0].account_id.id),
                     'account_analytic_id': (
                         tax.account_analytic_paid_id.id),
-                    'base_sign': tax.ref_base_sign,
                 })
             key = (val['tax_code_id'], val['base_code_id'],
                    val['account_id'])

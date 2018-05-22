@@ -18,7 +18,7 @@
                 <h3 groups="avalara_salestax.group_avatax_view"><label style="color: #7c7bad;" for="shipping_lines"/></h3>
                 <field name="shipping_lines" groups="avalara_salestax.group_avatax_view">
                     <tree string="Shipping Order Lines" editable="bottom">
-                        <field name="ship_method_id" on_change="onchange_select(ship_method_id)"/>
+                        <field name="ship_method_id"/>
                         <field name="ship_code_id"/>
                         <field name="tax_amt" readonly="1"/>
                         <field name="shipping_cost"/>

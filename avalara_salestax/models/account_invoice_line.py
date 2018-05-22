@@ -11,7 +11,10 @@ class InvoiceLine(models.Model):
 
     @api.model
     def move_line_get(self, invoice_id):
-        """ Override to replace tax computation if AvaTax applies """
+        """ Override to replace tax computation if AvaTax applies.
+        FIXME: this is currently broken in combination with another tax on the
+        line (and/or order based taxes).
+        """
         invoice = self.env['account.invoice'].browse(invoice_id)
         avatax_config = self.env[
             'avalara.salestax']._get_avatax_config_company(

@@ -20,8 +20,8 @@ class ShippingOrderLine(models.Model):
                 'type': 'freight',
             })
 
-    @api.onchange('select')
-    def onchange_select(self):
+    @api.onchange('ship_method_id')
+    def onchange_ship_method_id(self):
         self.name = self.ship_method_id.name
         self.shipping_cost = self.ship_method_id.shipping_cost
         self.sale_account_id = self.ship_method_id.account_id

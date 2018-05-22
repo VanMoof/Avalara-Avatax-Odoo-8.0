@@ -65,9 +65,6 @@ class SaleOrder(models.Model):
             'exemption_code': order.exemption_code or '',
             'exemption_code_id': order.exemption_code_id.id,
             'shipping_amt': order.amount_shipping,
-            'tax_add_default': order.tax_add_default,
-            'tax_add_invoice': order.tax_add_invoice,
-            'tax_add_shipping': order.tax_add_shipping,
             'shipping_address': order.tax_address,
             'location_code': order.warehouse_id.code or '',
         })
@@ -133,6 +130,11 @@ class SaleOrder(models.Model):
         res = super(SaleOrder, self)._amount_all(field_name, arg)
         for order in self:
             res[order.id]['amount_total'] += order.amount_shipping
+            # Add tax amount in case of order level computation
+            if order.tax_amount and all(
+                    not line.tax_amt for line in order.order_line):
+                res[order.id]['amount_tax'] += order.tax_amount
+                res[order.id]['amount_total'] += order.tax_amount
         return res
 
     @api.cr
@@ -224,12 +226,12 @@ class SaleOrder(models.Model):
             self.order_line.write({'tax_amt': 0.0})
             self.shipping_lines.write({'tax_amt': 0.0})
 
+        self.tax_amount = tax_amount
+
         if self.order_line:
             # Force total recompute
             self.order_line[0].write(
                 {'price_unit': self.order_line[0].price_unit})
-
-        self.tax_amount = tax_amount
 
     @api.multi
     def action_wait(self):
