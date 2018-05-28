@@ -137,11 +137,6 @@ class SaleOrder(models.Model):
                 res[order.id]['amount_total'] += order.tax_amount
         return res
 
-    @api.cr
-    def _register_hook(self, cr):
-        # TODO:replace function reference to _amount_all
-        return super(SaleOrder, self)._register_hook(cr)
-
     @api.multi
     def button_dummy(self):
         # In this module, tax is not automatically updated using stored
