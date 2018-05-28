@@ -274,6 +274,11 @@ class AccountInvoice(models.Model):
             config, partner = invoice.test_avalara()
             if not config:
                 continue
+            if any(line.invoice_line_tax_id for line in invoice.invoice_line):
+                raise UserError(
+                    _('Taxes on this invoice are fetched using AvaTax. '
+                      'Manually added taxes are not supported. Please remove '
+                      'these taxes from the invoice lines.'))
             shipping_add_origin = invoice.get_origin_address_for_tax()
             tax_date = invoice.get_origin_tax_date()
             sign = 1 if invoice.type == 'out_invoice' else -1

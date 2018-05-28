@@ -1,6 +1,8 @@
 # coding: utf-8
 from openerp import api, fields, models
 from openerp.addons import decimal_precision as dp
+from openerp.exceptions import Warning as UserError
+from openerp.tools.translate import _
 
 
 class InvoiceLine(models.Model):
@@ -24,6 +26,11 @@ class InvoiceLine(models.Model):
                 not in avatax_config.country_ids):
             return super(InvoiceLine, self).move_line_get(invoice_id)
 
+        if any(line.invoice_line_tax_id for line in invoice.invoice_line):
+            raise UserError(
+                _('Taxes on this invoice are fetched using AvaTax. '
+                  'Manually added taxes are not supported. Please remove '
+                  'these taxes from the invoice lines.'))
         res = []
         currency = invoice.currency_id.with_context(date=invoice.date_invoice)
 
