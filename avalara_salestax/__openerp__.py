@@ -46,6 +46,8 @@ Note: We always recommend testing the module before deploying to a production en
         'security/res_groups.xml',
         'views/menu.xml',  # must come first
         'views/account_invoice.xml',
+        # ping action is refered to from avalara_salestax.xml
+        'avalara_salestax_ping.xml',
         'views/avalara_salestax.xml',
         'views/avalara_salestax_address_validate.xml',
         'views/exemption_code.xml',
@@ -55,7 +57,6 @@ Note: We always recommend testing the module before deploying to a production en
         'views/product_template.xml',
         'views/res_partner.xml',
         'views/sale_order.xml',
-        "wizard/avalara_salestax_ping_view.xml",
         "security/avalara_salestax_security.xml",
         "security/ir.model.access.csv",
     ],
