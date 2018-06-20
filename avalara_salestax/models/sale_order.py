@@ -179,9 +179,11 @@ class SaleOrder(models.Model):
             ship_from_address = self.warehouse_id.partner_id
 
         if config.address_validation and not partner.date_validation:
-            raise UserError(
-                'Address not avalara-validated: customer %s on order %s' %
-                (partner.name, self.name))
+            if not config.validation_on_save:
+                raise UserError(
+                    'Address not avalara-validated: customer %s on order %s' %
+                    (partner.name, self.name))
+            partner.multi_address_validation()
 
         lines1 = self.order_line.create_avalara_lines()
         lines2 = self.shipping_lines.create_avalara_lines()
