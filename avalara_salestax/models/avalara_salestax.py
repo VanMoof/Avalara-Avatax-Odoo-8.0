@@ -1,11 +1,19 @@
 # coding: utf-8
 from openerp import api, fields, models
+from openerp.addons.avalara_salestax.avalara_api import AvaTaxService
 
 
 class AvalaraSalestax(models.Model):
     _name = 'avalara.salestax'
     _description = 'AvaTax Configuration'
     _rec_name = 'account_number'
+
+    @api.multi
+    def get_service(self):
+        self.ensure_one()
+        return AvaTaxService(
+            self.account_number, self.license_key, self.service_url,
+            self.request_timeout, self.logging)
 
     @api.model
     def _get_avatax_config_company(self, company=None):

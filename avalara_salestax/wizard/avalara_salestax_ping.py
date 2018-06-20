@@ -18,35 +18,22 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
-
-from openerp.osv import fields,osv
-from openerp.tools.translate import _
-from openerp.addons.avalara_salestax.avalara_api import AvaTaxService
-#from avalara_salestax.avalara_api import AvaTaxService
-#from ../avalara_api import AvaTaxService
-'''
-def load_src(name, fpath):
-    import os, imp
-    return imp.load_source(name, os.path.join(os.path.dirname(__file__), fpath))
-
-aapi = load_src("aapi", "../avalara_api.py")
-from aapi import AvaTaxService 
-    '''
+from openerp.osv import fields, osv
 
 
 class avalara_salestax_ping(osv.osv_memory):
     _name = 'avalara.salestax.ping'
     _description = 'Ping Service'
-    
+
     def default_get(self, cr, uid, fields_list=None, context=None):
-        res = super(avalara_salestax_ping, self).default_get(cr, uid, fields_list, context)
+        res = super(avalara_salestax_ping, self).default_get(
+            cr, uid, fields_list, context)
         self.ping(cr, uid, context=context)
         return res
-    
+
     _columns = {
         'name': fields.char('Name', size=64),
     }
-
 
     def ping(self, cr, uid, context=None):
         """ Call the AvaTax's Ping Service to test the connection. """
@@ -55,16 +42,13 @@ class avalara_salestax_ping(osv.osv_memory):
 
         if context.get('active_id', False):
             avatax_pool = self.pool.get('avalara.salestax')
-            avatax_config = avatax_pool.browse(cr, uid, context['active_id'], context=context)
-            avapoint = AvaTaxService(avatax_config.account_number, avatax_config.license_key,
-                                      avatax_config.service_url, avatax_config.request_timeout, avatax_config.logging)
-            taxSvc = avapoint.create_tax_service().taxSvc     # Create 'tax' service for Ping and is_authorized calls
+            avatax_config = avatax_pool.browse(
+                cr, uid, context['active_id'], context=context)
+            avapoint = avatax_config.get_service()
+            # Create 'tax' service for Ping and is_authorized calls
+            avapoint.create_tax_service()
             avapoint.ping()
             result = avapoint.is_authorized()
-            avatax_pool.write(cr, uid, avatax_config.id, {'date_expiration': result.Expires})
+            avatax_pool.write(
+                cr, uid, avatax_config.id, {'date_expiration': result.Expires})
         return True
-    
-
-avalara_salestax_ping()
-
-# vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

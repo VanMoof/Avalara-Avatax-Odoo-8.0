@@ -2,6 +2,7 @@
 from openerp import api, fields, models
 from openerp.addons import decimal_precision as dp
 from openerp.exceptions import Warning as UserError
+from openerp.tools.translate import _
 
 
 class AccountInvoice(models.Model):
