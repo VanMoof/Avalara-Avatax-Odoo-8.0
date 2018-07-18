@@ -41,8 +41,8 @@ class SaleOrder(models.Model):
     @api.depends('shipping_lines', 'shipping_lines.shipping_cost')
     def _compute_amount_shipping(self):
         for order in self:
-            self.amount_shipping = order.pricelist_id.currency_id.round(
-                sum(line.shipping_cost for line in self.shipping_lines))
+            order.amount_shipping = order.pricelist_id.currency_id.round(
+                sum(line.shipping_cost for line in order.shipping_lines))
 
     @api.model
     def _prepare_invoice(self, order, lines):
@@ -108,16 +108,15 @@ class SaleOrder(models.Model):
         elif vals.get('tax_add_shipping'):
             for sale in self:
                 sale.get_tax_values_from_partner(self.partner_shipping_id)
-        else:
-            if vals.get('partner_id'):
-                for sale in self.filtered('tax_add_default'):
-                    sale.get_tax_values_from_partner(self.partner_id)
-            elif vals.get('partner_invoice_id'):
-                for sale in self.filtered('tax_add_invoice'):
-                    sale.get_tax_values_from_partner(self.partner_invoice_id)
-            elif vals.get('partner_shipping_id'):
-                for sale in self.filtered('tax_add_shipping'):
-                    sale.get_tax_values_from_partner(self.partner_shipping_id)
+        elif vals.get('partner_id'):
+            for sale in self.filtered('tax_add_default'):
+                sale.get_tax_values_from_partner(self.partner_id)
+        elif vals.get('partner_invoice_id'):
+            for sale in self.filtered('tax_add_invoice'):
+                sale.get_tax_values_from_partner(self.partner_invoice_id)
+        elif vals.get('partner_shipping_id'):
+            for sale in self.filtered('tax_add_shipping'):
+                sale.get_tax_values_from_partner(self.partner_shipping_id)
         return res
 
     @api.model
