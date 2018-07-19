@@ -24,15 +24,12 @@ class SaleOrder(models.Model):
         store=True)
     tax_amount = fields.Float(
         'Avalara tax amount', digits=dp.get_precision('Sale Price'))
-    tax_add_default = fields.Boolean(
-        'Use default address', readonly=True,
-        states={'draft': [('readonly', False)]})
-    tax_add_invoice = fields.Boolean(
-        'Use invoice address', readonly=True,
-        states={'draft': [('readonly', False)]})
-    tax_add_shipping = fields.Boolean(
-        'Use delivery address', default=True,
-        readonly=True, states={'draft': [('readonly', False)]})
+    tax_location = fields.Selection(
+        [('default', 'Use customer main address'),
+         ('invoice', 'Use invoice address'),
+         ('shipping', 'Use shipping address')],
+        readonly=True, states={'draft': [('readonly', False)]},
+        default='shipping')
     tax_address = fields.Text('Tax Address', readonly=True)
     location_code = fields.Char(
         'Origin address', readonly=True, help='Origin address location code')
@@ -82,9 +79,9 @@ class SaleOrder(models.Model):
     @api.multi
     def get_tax_partner(self):
         self.ensure_one()
-        if self.tax_add_default:
+        if self.tax_location == 'default':
             return self.partner_id
-        if self.tax_add_invoice:
+        if self.tax_location == 'invoice':
             return self.partner_invoice_id
         return self.partner_shipping_id
 
@@ -99,24 +96,22 @@ class SaleOrder(models.Model):
     @api.multi
     def write(self, vals):
         res = super(SaleOrder, self).write(vals)
-        if vals.get('tax_add_default'):
+        if vals.get('tax_location'):
             for sale in self:
-                sale.get_tax_values_from_partner(self.partner_id)
-        elif vals.get('tax_add_invoice'):
-            for sale in self:
-                sale.get_tax_values_from_partner(self.partner_invoice_id)
-        elif vals.get('tax_add_shipping'):
-            for sale in self:
-                sale.get_tax_values_from_partner(self.partner_shipping_id)
-        elif vals.get('partner_id'):
-            for sale in self.filtered('tax_add_default'):
-                sale.get_tax_values_from_partner(self.partner_id)
-        elif vals.get('partner_invoice_id'):
-            for sale in self.filtered('tax_add_invoice'):
-                sale.get_tax_values_from_partner(self.partner_invoice_id)
-        elif vals.get('partner_shipping_id'):
-            for sale in self.filtered('tax_add_shipping'):
-                sale.get_tax_values_from_partner(self.partner_shipping_id)
+                sale.get_tax_values_from_partner(self.get_tax_partner())
+        else:
+            if vals.get('partner_id'):
+                for sale in self.filtered(
+                        lambda s: s.tax_location == 'default'):
+                    sale.get_tax_values_from_partner(self.partner_id)
+            if vals.get('partner_invoice_id'):
+                for sale in self.filtered(
+                        lambda s: s.tax_location == 'invoice'):
+                    sale.get_tax_values_from_partner(self.partner_invoice_id)
+            if vals.get('partner_shipping_id'):
+                for sale in self.filtered(
+                        lambda s: s.tax_location == 'shipping'):
+                    sale.get_tax_values_from_partner(self.partner_shipping_id)
         return res
 
     @api.model
@@ -235,3 +230,10 @@ class SaleOrder(models.Model):
         for order in self:
             order.compute_tax()
         return res
+
+    @api.onchange('tax_location')
+    def onchange_tax_location(self):
+        if self.tax_location:
+            partner = self.get_tax_partner()
+            if partner:
+                self.get_tax_values_from_partner(partner)

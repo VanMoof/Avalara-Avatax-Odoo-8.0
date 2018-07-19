@@ -37,11 +37,7 @@
                 <xpath expr="/form/sheet/group" position="after">
                     <group colspan="4" col="4" string="Avalara Tax on..." groups="avalara_salestax.group_avatax_view">
                         <group colspan="2" col="2">
-                            <field name="tax_add_default"/>
-                            <field name="tax_add_invoice"/>
-                            <field name="tax_add_shipping"/>
-                        </group>
-                        <group colspan="2" col="2">
+                            <field name="tax_location"/>
                             <field name="tax_address" readonly="1"/>
                         </group>
                     </group>
