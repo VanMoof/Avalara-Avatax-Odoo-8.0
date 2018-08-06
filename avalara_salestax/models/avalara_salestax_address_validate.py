@@ -23,7 +23,7 @@ from openerp.exceptions import Warning as UserError
 from openerp.tools.translate import _
 
 
-class AddressValidate(models.Model):
+class AddressValidate(models.TransientModel):
     """Address Validation using Avalara API"""
     _name = 'avalara.salestax.address.validate'
     _rec_name = 'partner_id'

@@ -201,9 +201,11 @@ class AccountInvoice(models.Model):
         if not config:
             return
         if config.address_validation and not partner.date_validation:
-            raise UserError(
-                'Address not avalara-validated: customer %s on invoice %s' %
-                (partner.name, self.internal_number))
+            if not config.validation_on_save:
+                raise UserError(
+                    'Address not avalara-validated: customer %s on invoice %s' %
+                    (partner.name, self.internal_number))
+            partner.multi_address_validation()
 
         ship_from_address = self.get_origin_address_for_tax()
         sign = 1 if self.type == 'out_invoice' else -1
