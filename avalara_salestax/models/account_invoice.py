@@ -57,8 +57,8 @@ class AccountInvoice(models.Model):
                 so_origin = a.split(':')[0]
             order = self.env['sale.order'].search(
                 [('name', '=', so_origin)], limit=1)
-            if order:
-                return order.get_tax_partner()
+        if order:
+            return order.get_tax_partner()
         return self.partner_id
 
     @api.multi
