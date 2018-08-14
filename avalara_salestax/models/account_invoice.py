@@ -218,7 +218,7 @@ class AccountInvoice(models.Model):
             # Line level tax calculation
             # tax based on individual order line
             for line1, o_line in zip(lines1, self.invoice_line):
-                o_line.tax_amt = self.env['account.tax']._get_compute_tax(
+                o_line.tax_amt = sign * self.env['account.tax']._get_compute_tax(
                     config, date,
                     self.internal_number, 'SalesOrder', self.partner_id,
                     ship_from_address, partner, [line1], self.user_id,
@@ -259,7 +259,7 @@ class AccountInvoice(models.Model):
             return False, False
         config = self.env['avalara.salestax'].with_context(
             force_company=self.company_id.id)._get_avatax_config_company()
-        if not config or config.disable_tax_reporting:
+        if not config or config.disable_tax_calculation:
             return False, False
         partner = self.get_tax_partner()
         if (not partner.country_id or

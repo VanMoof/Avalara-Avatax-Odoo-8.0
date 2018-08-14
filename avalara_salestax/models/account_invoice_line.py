@@ -43,11 +43,10 @@ class InvoiceLine(models.Model):
 
             for tax in self.env['account.invoice.tax'].compute(
                     invoice).values():
+                tax_code_id = tax['base_code_id']
                 if invoice.type in ('out_invoice', 'in_invoice'):
-                    tax_code_id = tax['base_code_id']
                     tax_amount = line.price_subtotal * tax['base_sign'] or 1.0
                 else:
-                    tax_code_id = tax['ref_base_code_id']
                     tax_amount = line.price_subtotal * tax['ref_base_sign']
                 if tax_code_found:
                     if not tax_code_id:
