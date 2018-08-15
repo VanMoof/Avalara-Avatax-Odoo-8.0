@@ -120,7 +120,7 @@ class AccountInvoice(models.Model):
     @api.onchange('warehouse_id')
     def onchange_warehouse_id(self):
         if self.warehouse_id:
-            self.warehouse_code = self.warehouse_id.code
+            self.location_code = self.warehouse_id.code
 
     @api.multi
     def action_cancel(self):

@@ -31,11 +31,15 @@
                 <field name="shipping_amt" groups="avalara_salestax.group_avatax_view"/>
             </field>
 
-            <xpath expr="/form/sheet/group/group/field[@name='account_id']" position="after">
-                <field name="exemption_code" readonly="1" groups="avalara_salestax.group_avatax_view"/>
-                <field name="exemption_code_id" readonly="1" groups="avalara_salestax.group_avatax_view"/>
-                <field name="warehouse_id" options="{'no_create': True}" groups="stock.group_locations"/>
-                <field name="location_code" groups="avalara_salestax.group_avatax_view"/>
+            <xpath expr="//page[@string='Other Info']" position="inside">
+                <group>
+                    <group groups="avalara_salestax.group_avatax_view" string="Avatax">
+                        <field name="exemption_code" readonly="1" groups="avalara_salestax.group_avatax_view"/>
+                        <field name="exemption_code_id" readonly="1" groups="avalara_salestax.group_avatax_view"/>
+                        <field name="warehouse_id" options="{'no_create': True}" groups="stock.group_locations"/>
+                        <field name="location_code" groups="avalara_salestax.group_avatax_view"/>
+                    </group>
+                </group>
             </xpath>
         </field>
     </record>
