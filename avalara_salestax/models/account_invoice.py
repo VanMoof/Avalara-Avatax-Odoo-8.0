@@ -44,11 +44,17 @@ class AccountInvoice(models.Model):
         self.amount_total += self.shipping_amt
 
     @api.multi
-    def get_tax_partner(self):
-        """ partner address, on which avalara tax will calculate  """
+    def get_sale_order(self):
         self.ensure_one()
         order = self.env['sale.order'].search(
             [('invoice_ids', '=', self.id)], limit=1)
+        if not order and self.origin:
+            refund = self.search([
+                ('number', '=', self.origin),
+                ('partner_id', '=', self.partner_id.id)], limit=1)
+            if refund:
+                order = self.env['sale.order'].search(
+                    [('invoice_ids', '=', refund.id)], limit=1)
         if not order and self.origin:
             a = self.origin
             if len(a.split(':')) > 1:
@@ -57,6 +63,13 @@ class AccountInvoice(models.Model):
                 so_origin = a.split(':')[0]
             order = self.env['sale.order'].search(
                 [('name', '=', so_origin)], limit=1)
+        return order or self.env['sale.order']
+
+    @api.multi
+    def get_tax_partner(self):
+        """ partner address, on which avalara tax will calculate  """
+        self.ensure_one()
+        order = self.get_sale_order()
         if order:
             return order.get_tax_partner()
         return self.partner_id
@@ -65,15 +78,7 @@ class AccountInvoice(models.Model):
     def get_origin_address_for_tax(self):
         """ partner address, on which avalara tax will calculate  """
         self.ensure_one()
-        order = self.env['sale.order'].search(
-            [('invoice_ids', '=', self.id)], limit=1)
-        if not order and self.origin:
-            if len(self.origin.split(':')) > 1:
-                so_origin = self.origin.split(':')[1]
-            else:
-                so_origin = self.origin.split(':')[0]
-            order = self.env['sale.order'].search(
-                [('name', '=', so_origin)], limit=1)
+        order = self.get_sale_order()
         if order and order.warehouse_id and order.warehouse_id.partner_id:
             return order.warehouse_id.partner_id
         if self.warehouse_id and order.warehouse_id.partner_id:
@@ -203,8 +208,8 @@ class AccountInvoice(models.Model):
         if config.address_validation and not partner.date_validation:
             if not config.validation_on_save:
                 raise UserError(
-                    'Address not avalara-validated: customer %s on invoice %s' %
-                    (partner.name, self.internal_number))
+                    'Address not avalara-validated: customer %s on invoice '
+                    '%s' % (partner.name, self.internal_number))
             partner.multi_address_validation()
 
         ship_from_address = self.get_origin_address_for_tax()
@@ -218,12 +223,13 @@ class AccountInvoice(models.Model):
             # Line level tax calculation
             # tax based on individual order line
             for line1, o_line in zip(lines1, self.invoice_line):
-                o_line.tax_amt = sign * self.env['account.tax']._get_compute_tax(
-                    config, date,
-                    self.internal_number, 'SalesOrder', self.partner_id,
-                    ship_from_address, partner, [line1], self.user_id,
-                    self.exemption_code,
-                    self.exemption_code_id.code).TotalTax
+                o_line.tax_amt = sign * self.env[
+                    'account.tax']._get_compute_tax(
+                        config, date,
+                        self.internal_number, 'SalesOrder', self.partner_id,
+                        ship_from_address, partner, [line1], self.user_id,
+                        self.exemption_code,
+                        self.exemption_code_id.code).TotalTax
                 tax_amount += o_line.tax_amt
 
             # tax based on individual shipping order line
