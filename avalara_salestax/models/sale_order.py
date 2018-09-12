@@ -98,20 +98,20 @@ class SaleOrder(models.Model):
         res = super(SaleOrder, self).write(vals)
         if vals.get('tax_location'):
             for sale in self:
-                sale.get_tax_values_from_partner(self.get_tax_partner())
+                sale.get_tax_values_from_partner(sale.get_tax_partner())
         else:
             if vals.get('partner_id'):
                 for sale in self.filtered(
                         lambda s: s.tax_location == 'default'):
-                    sale.get_tax_values_from_partner(self.partner_id)
+                    sale.get_tax_values_from_partner(sale.partner_id)
             if vals.get('partner_invoice_id'):
                 for sale in self.filtered(
                         lambda s: s.tax_location == 'invoice'):
-                    sale.get_tax_values_from_partner(self.partner_invoice_id)
+                    sale.get_tax_values_from_partner(sale.partner_invoice_id)
             if vals.get('partner_shipping_id'):
                 for sale in self.filtered(
                         lambda s: s.tax_location == 'shipping'):
-                    sale.get_tax_values_from_partner(self.partner_shipping_id)
+                    sale.get_tax_values_from_partner(sale.partner_shipping_id)
         return res
 
     @api.model
