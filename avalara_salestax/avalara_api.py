@@ -1,3 +1,4 @@
+import logging
 import suds
 import socket
 import urllib2
@@ -13,7 +14,7 @@ from openerp.osv import osv
 class AvaTaxService:
 
     def enable_log(self):
-        import logging, tempfile
+        import tempfile
         logger = logging.getLogger('suds.client')
         logger.setLevel(logging.DEBUG)
         handler = logging.FileHandler(os.path.join(tempfile.gettempdir(), "soap-messages.log"))
@@ -143,6 +144,10 @@ class AvaTaxService:
         lineslist = []
         request = self.taxSvc.factory.create('GetTaxRequest')
         request.Commit = commit
+        if commit:
+            logging.getLogger(__name__).info(
+                'Committing Avalara tax for document %s', doc_code)
+
         request.DetailLevel = 'Diagnostic'
 #        request.DetailLevel = 'Document'
         request.Discount = 0.0

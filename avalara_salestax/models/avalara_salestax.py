@@ -118,7 +118,7 @@ class AvalaraSalestax(models.Model):
         default=True, help="Uncheck the active field to hide the record")
     company_id = fields.Many2one(
         'res.company', 'Company', required=True,
-        default='_get_default_company',
+        default=_get_default_company,
         help="Company which has subscribed to the AvaTax service")
     on_line = fields.Boolean(
         'Line-level', help="It will calculate tax line by line and also show.")
