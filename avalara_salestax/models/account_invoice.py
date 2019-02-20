@@ -274,6 +274,33 @@ class AccountInvoice(models.Model):
         return config, partner
 
     @api.multi
+    def avalara_commit(self):
+        self.ensure_one()
+        if self.state not in ('open', 'paid'):
+            raise UserError(
+                _('Cannot commit an Avalara invoice (%s) that is not in a '
+                  'confirmed state (%s)') % (self.name, self.state))
+        config, partner = self.test_avalara()
+        shipping_add_origin = self.get_origin_address_for_tax()
+        tax_date = self.get_origin_tax_date()
+        sign = 1 if self.type == 'out_invoice' else -1
+        lines1 = self.invoice_line.create_avalara_lines(
+            config, sign=sign)
+        lines2 = self.shipping_lines.create_avalara_lines(sign=sign)
+        document_type = (
+            'ReturnInvoice'
+            if self.type == 'out_refund' else 'SalesInvoice')
+        self.env['account.tax']._get_compute_tax(
+            config, self.date_invoice, self.internal_number,
+            document_type, self.partner_id, shipping_add_origin,
+            partner, lines1 + lines2, user=self.user_id,
+            exemption_number=self.exemption_code,
+            exemption_code_name=self.exemption_code_id.code,
+            commit=True, invoice_date=tax_date,
+            reference_code=self.invoice_doc_no,
+            location_code=self.location_code)
+
+    @api.multi
     def invoice_validate(self):
         """Commit the Avalara invoice record on invoice validation """
         to_commit = self.filtered(
@@ -288,24 +315,7 @@ class AccountInvoice(models.Model):
                     _('Taxes on this invoice are fetched using AvaTax. '
                       'Manually added taxes are not supported. Please remove '
                       'these taxes from the invoice lines.'))
-            shipping_add_origin = invoice.get_origin_address_for_tax()
-            tax_date = invoice.get_origin_tax_date()
-            sign = 1 if invoice.type == 'out_invoice' else -1
-            lines1 = invoice.invoice_line.create_avalara_lines(
-                config, sign=sign)
-            lines2 = invoice.shipping_lines.create_avalara_lines(sign=sign)
-            document_type = (
-                'ReturnInvoice'
-                if invoice.type == 'out_refund' else 'SalesInvoice')
-            self.env['account.tax']._get_compute_tax(
-                config, invoice.date_invoice, invoice.internal_number,
-                document_type, invoice.partner_id, shipping_add_origin,
-                partner, lines1 + lines2, user=invoice.user_id,
-                exemption_number=invoice.exemption_code,
-                exemption_code_name=invoice.exemption_code_id.code,
-                commit=True, invoice_date=tax_date,
-                reference_code=invoice.invoice_doc_no,
-                location_code=invoice.location_code)
+            invoice.avalara_commit()
         return res
 
     @api.model

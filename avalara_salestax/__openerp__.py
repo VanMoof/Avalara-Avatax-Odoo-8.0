@@ -64,8 +64,5 @@ Note: We always recommend testing the module before deploying to a production en
         "images/main_screenshot.png",   
         "images/kranbery_logo.png",     
     ],
-    'demo': [
-        'demo.xml',
-    ],    
     'installable': True,
 }
