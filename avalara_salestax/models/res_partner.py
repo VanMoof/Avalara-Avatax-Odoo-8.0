@@ -29,7 +29,7 @@ class ResPartner(models.Model):
     validated_on_save = fields.Boolean(
         'Validated On Save',
         help='Indicates if the address was validated automatically')
-    customer_code = fields.Char('Avalara Customer Code')
+    customer_code = fields.Char('Avalara Customer Code', copy=False)
     tax_apply = fields.Boolean(
         'Tax Calculation',
         help='Indicates that AvaTax calculation is compulsory')
