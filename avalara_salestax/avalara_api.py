@@ -109,7 +109,12 @@ class AvaTaxService:
                 elif (w_message._Name == 'UnsupportedCountryError' ):
                     raise osv.except_osv(_("AvaTax: Notice\n\n"), _("Please ensure that you are validating an address in the US and Canada only.  If the address it outside of those countries, Avalara will still calculate global tax rules but will not validate those addresses."))
                 else:
-                    raise osv.except_osv(_('AvaTax: Error: '+str(w_message._Name)+"\n\n"), _("Summary: " + w_message.Summary + "\n Details: " + w_message.Details + "\n Severity: " + w_message.Severity))
+                    raise osv.except_osv(
+                        _('AvaTax: Error: %s \n\n') % w_message._Name,
+                        _("Summary: %s \n Details: %s \n Severity: %s") %
+                         (w_message.Summary,
+                          w_message.Details,
+                          w_message.Severity))
             else:
                 return result
             

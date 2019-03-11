@@ -72,7 +72,7 @@ class ResPartner(models.Model):
             return
         avapoint = AvaTaxService(
             config.account_number, config.license_key,
-            config.service_url, config.request_timeout,
+            config.service_url.encode('ascii'), config.request_timeout,
             config.logging)
         addSvc = avapoint.create_address_service().addressSvc
 

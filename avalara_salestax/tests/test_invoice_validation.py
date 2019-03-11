@@ -6,8 +6,7 @@ from openerp.tests.common import TransactionCase
 class TestInvoiceValidationSetUp(TransactionCase):
     def setUp(self):
         super(TestInvoiceValidationSetUp, self).setUp()
-        config = self.env['avalara.salestax'].search([
-            ('company_code', 'not like', 'Contact Avalara')], limit=1)
+        config = self.env['avalara.salestax'].search([], limit=1)
         if not config:
             import logging
             logging.getLogger(__name__).warn(
@@ -48,7 +47,7 @@ class TestInvoiceValidationSetUp(TransactionCase):
                 'account_id': customer.property_account_payable.id,
                 'invoice_line': [(0, False, {
                     'product_id': False,
-                    'name': '/1',
+                    'name': 'Test Ë',
                     'account_id': account.id,
                     'quantity': 1,
                     'price_unit': 100.00},

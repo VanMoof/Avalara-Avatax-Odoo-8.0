@@ -52,7 +52,8 @@ class AccountTax(models.Model):
         # For check credential
         avalara_obj = AvaTaxService(
             config.account_number, config.license_key,
-            config.service_url, config.request_timeout, config.logging)
+            config.service_url.encode('ascii'), config.request_timeout,
+            config.logging)
         avalara_obj.create_tax_service()
         addSvc = avalara_obj.create_address_service().addressSvc
         origin = BaseAddress(
@@ -91,7 +92,7 @@ class AccountTax(models.Model):
         """ Cancel previously registered tax """
         avalara_obj = AvaTaxService(
             config.account_number, config.license_key,
-            config.service_url, config.request_timeout,
+            config.service_url.encode('ascii'), config.request_timeout,
             config.logging)
         avalara_obj.create_tax_service()
         try:
