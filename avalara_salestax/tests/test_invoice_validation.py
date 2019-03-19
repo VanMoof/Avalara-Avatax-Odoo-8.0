@@ -1,17 +1,14 @@
 # coding: utf-8
+from uuid import uuid1
 from testfixtures import LogCapture
+from .common import get_config
 from openerp.tests.common import TransactionCase
 
 
 class TestInvoiceValidationSetUp(TransactionCase):
     def setUp(self):
         super(TestInvoiceValidationSetUp, self).setUp()
-        config = self.env['avalara.salestax'].search([], limit=1)
-        if not config:
-            import logging
-            logging.getLogger(__name__).warn(
-                'Avalara test skipped because there is no configuration')
-            return
+        config = get_config(self.env)
         config.write({
             'service_url': 'https://development.avalara.net',
             'auto_generate_customer_code': True,
@@ -38,6 +35,7 @@ class TestInvoiceValidationSetUp(TransactionCase):
         })
         journal = self.env['account.journal'].search([
             ('type', '=', 'sale'), ('company_id', '=', company.id)], limit=1)
+        journal.sequence_id.prefix = uuid1()
         account = self.env['account.account'].search([
             ('type', '=', 'other'), ('company_id', '=', company.id)], limit=1)
         self.invoice = self.env['account.invoice'].create({
