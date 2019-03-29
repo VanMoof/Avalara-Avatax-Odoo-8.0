@@ -267,6 +267,7 @@ class BaseAddress:
         self.data.Country = Country
         self.data.AddressCode = AddressCode
 
+
 class Line:
 
     def __init__(self, taxSvc, ItemCode, Amount, Qty, Description=None, TaxCode=None):
