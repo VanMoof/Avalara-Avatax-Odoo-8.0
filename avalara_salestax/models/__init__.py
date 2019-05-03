@@ -2,6 +2,7 @@ from . import account_invoice
 from . import account_invoice_line
 from . import account_invoice_tax
 from . import account_tax
+from . import avalara_onthefly
 from . import avalara_salestax
 from . import avalara_salestax_address_validate
 from . import exemption_code

@@ -4,7 +4,7 @@
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 {
     "name" : "Avalara Avatax connector for sales tax calculation",
-    "version" : '8.0.1.1.0',
+    "version" : '8.0.1.1.1',
     "author" : 'Kranbery Technologies, Opener B.V.',
     'summary': 'Sales tax is hard. We make it easy.',
     "description": """ 
